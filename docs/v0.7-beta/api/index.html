@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>7. API reference &#8212; FWU API 0.7.0-bet.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="7.1. Library conventions" href="update.html" />
+    <link rel="prev" title="6. Image metadata" href="../image-formats.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="api-reference">
+<span id="id1"></span><h1>7. API reference</h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="update.html">7.1. Library conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="update.html#behavior-on-error">7.2. Behavior on error</a></li>
+<li class="toctree-l1"><a class="reference internal" href="update.html#pointer-conventions">7.3. Pointer conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="update.html#macros">7.4. Macros</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="update.html#library-versioning">7.4.1. Library versioning</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="update.html#PSA_FWU_API_VERSION_MAJOR"><code class="docutils literal notranslate"><span class="pre">PSA_FWU_API_VERSION_MAJOR</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="update.html#PSA_FWU_API_VERSION_MINOR"><code class="docutils literal notranslate"><span class="pre">PSA_FWU_API_VERSION_MINOR</span></code> (macro)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#image-transfer">7.4.2. Image transfer</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="update.html#PSA_FWU_MAX_BLOCK_SIZE"><code class="docutils literal notranslate"><span class="pre">PSA_FWU_MAX_BLOCK_SIZE</span></code> (macro)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#digest-size">7.4.3. Digest size</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="update.html#PSA_FWU_MAX_DIGEST_SIZE"><code class="docutils literal notranslate"><span class="pre">PSA_FWU_MAX_DIGEST_SIZE</span></code> (macro)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#image-states">7.4.4. Image states</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="update.html#PSA_IMAGE_UNDEFINED"><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_UNDEFINED</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="update.html#PSA_IMAGE_CANDIDATE"><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_CANDIDATE</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="update.html#PSA_IMAGE_INSTALLED"><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_INSTALLED</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="update.html#PSA_IMAGE_REJECTED"><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_REJECTED</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="update.html#PSA_IMAGE_PENDING_INSTALL"><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_PENDING_INSTALL</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="update.html#PSA_IMAGE_REBOOT_NEEDED"><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_REBOOT_NEEDED</span></code> (macro)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#image-flags">7.4.5. Image flags</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="update.html#PSA_IMAGE_FLAG_VOLATILE_STAGING"><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_FLAG_VOLATILE_STAGING</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="update.html#PSA_IMAGE_FLAG_ENCRYPTION"><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_FLAG_ENCRYPTION</span></code> (macro)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="update.html#types">7.5. Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_image_version_t">7.5.1. <code class="docutils literal notranslate"><span class="pre">psa_image_version_t</span></code> (struct)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_staging_info_t">7.5.2. <code class="docutils literal notranslate"><span class="pre">psa_staging_info_t</span></code> (struct)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_image_info_t">7.5.3. <code class="docutils literal notranslate"><span class="pre">psa_image_info_t</span></code> (struct)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_uuid_t">7.5.4. <code class="docutils literal notranslate"><span class="pre">psa_uuid_t</span></code> (struct)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_image_id_t">7.5.5. <code class="docutils literal notranslate"><span class="pre">psa_image_id_t</span></code> (type)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_fwu_iterator_t">7.5.6. <code class="docutils literal notranslate"><span class="pre">psa_fwu_iterator_t</span></code> (type)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_hash_t">7.5.7. <code class="docutils literal notranslate"><span class="pre">psa_hash_t</span></code> (struct)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="update.html#status-codes">7.6. Status codes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_status_t">7.6.1. <code class="docutils literal notranslate"><span class="pre">psa_status_t</span></code> (type)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_SUCCESS">7.6.2. <code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_SUCCESS_REBOOT">7.6.3. <code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS_REBOOT</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_SUCCESS_RESTART">7.6.4. <code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS_RESTART</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_SUCCESS_DEPENDENCY_NEEDED">7.6.5. <code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS_DEPENDENCY_NEEDED</span></code> (macro)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="update.html#error-codes">7.7. Error codes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_GENERIC_ERROR">7.7.1. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_GENERIC_ERROR</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_NOT_SUPPORTED">7.7.2. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_SUPPORTED</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_NOT_PERMITTED">7.7.3. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_PERMITTED</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_DOES_NOT_EXIST">7.7.4. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DOES_NOT_EXIST</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_INVALID_ARGUMENT">7.7.5. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_ARGUMENT</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_INSUFFICIENT_MEMORY">7.7.6. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_MEMORY</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_INSUFFICIENT_STORAGE">7.7.7. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_STORAGE</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_COMMUNICATION_FAILURE">7.7.8. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_COMMUNICATION_FAILURE</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_STORAGE_FAILURE">7.7.9. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_STORAGE_FAILURE</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_DATA_CORRUPT">7.7.10. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DATA_CORRUPT</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_DATA_INVALID">7.7.11. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DATA_INVALID</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_HARDWARE_FAILURE">7.7.12. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_HARDWARE_FAILURE</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_CORRUPTION_DETECTED">7.7.13. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_CORRUPTION_DETECTED</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_INVALID_SIGNATURE">7.7.14. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_SIGNATURE</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_INSUFFICIENT_DATA">7.7.15. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_DATA</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_WRONG_DEVICE">7.7.16. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_WRONG_DEVICE</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_DEPENDENCY_NEEDED">7.7.17. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DEPENDENCY_NEEDED</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_CURRENTLY_INSTALLING">7.7.18. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_CURRENTLY_INSTALLING</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_ALREADY_INSTALLED">7.7.19. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_ALREADY_INSTALLED</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_INSTALL_INTERRUPTED">7.7.20. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSTALL_INTERRUPTED</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_FLASH_ABUSE">7.7.21. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_FLASH_ABUSE</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_INSUFFICIENT_POWER">7.7.22. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_POWER</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_DECRYPTION_FAILURE">7.7.23. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DECRYPTION_FAILURE</span></code> (macro)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#PSA_ERROR_MISSING_MANIFEST">7.7.24. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_MISSING_MANIFEST</span></code> (macro)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="update.html#functions">7.8. Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_fwu_query">7.8.1. <code class="docutils literal notranslate"><span class="pre">psa_fwu_query</span></code> (function)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_fwu_set_manifest">7.8.2. <code class="docutils literal notranslate"><span class="pre">psa_fwu_set_manifest</span></code> (function)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_fwu_write">7.8.3. <code class="docutils literal notranslate"><span class="pre">psa_fwu_write</span></code> (function)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_fwu_install">7.8.4. <code class="docutils literal notranslate"><span class="pre">psa_fwu_install</span></code> (function)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_fwu_abort">7.8.5. <code class="docutils literal notranslate"><span class="pre">psa_fwu_abort</span></code> (function)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_fwu_request_reboot">7.8.6. <code class="docutils literal notranslate"><span class="pre">psa_fwu_request_reboot</span></code> (function)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_fwu_request_rollback">7.8.7. <code class="docutils literal notranslate"><span class="pre">psa_fwu_request_rollback</span></code> (function)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_fwu_accept">7.8.8. <code class="docutils literal notranslate"><span class="pre">psa_fwu_accept</span></code> (function)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_fwu_get_image_id_iterator">7.8.9. <code class="docutils literal notranslate"><span class="pre">psa_fwu_get_image_id_iterator</span></code> (function)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_fwu_get_image_id_next">7.8.10. <code class="docutils literal notranslate"><span class="pre">psa_fwu_get_image_id_next</span></code> (function)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_fwu_get_image_id_valid">7.8.11. <code class="docutils literal notranslate"><span class="pre">psa_fwu_get_image_id_valid</span></code> (function)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#psa_fwu_get_image_id">7.8.12. <code class="docutils literal notranslate"><span class="pre">psa_fwu_get_image_id</span></code> (function)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3><a href="../index.html"><b>FWU API</b></a></h3>
+IHI 0093<br/>
+Non-confidential<br/>
+Version 0.7.0-bet.0
+<span style="color: red; font-weight: bold;"></span>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About this document</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html#design-goals">2. Design goals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html">3. Terminology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html#trust-model-and-scenarios">4. Trust model and scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">5. Design overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../image-formats.html">6. Image metadata</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">7. API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="update.html">7.1. Library conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#behavior-on-error">7.2. Behavior on error</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#pointer-conventions">7.3. Pointer conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#macros">7.4. Macros</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#types">7.5. Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#status-codes">7.6. Status codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#error-codes">7.7. Error codes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="update.html#functions">7.8. Functions</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/example-header.html">Example header file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/examples.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/future-changes.html">Future changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/change-history.html">Change history</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; 2020-2021, Arm Limited or its affiliates. All rights reserved.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

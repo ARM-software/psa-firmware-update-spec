@@ -1,0 +1,259 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Example usage &#8212; FWU API 0.7.0-bet.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Future changes" href="future-changes.html" />
+    <link rel="prev" title="Example header file" href="example-header.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="example-usage">
+<span id="examples"></span><h1>Example usage</h1>
+<div class="admonition warning" id="pseudocode">
+<p class="admonition-title">Warning</p>
+<p>These examples are for illustrative purposes only and are not guaranteed to compile.
+Many error codes are not handled in order to keep the examples brief.
+A real implementation will need to initialize variables appropriately and handle
+failures as they see fit.</p>
+</div>
+<section id="retrieve-versions-of-installed-images">
+<h2>Retrieve versions of installed images</h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;psa/update.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stddef.h&gt;</span><span class="c1"> /* not necessarily required */</span><span class="cp"></span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">example_get_installation_info</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">psa_status_t</span><span class="w"> </span><span class="n">rc</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">psa_fwu_iterator_t</span><span class="w"> </span><span class="n">iter</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">psa_image_id_t</span><span class="w"> </span><span class="n">id</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">psa_image_info_t</span><span class="w"> </span><span class="n">image_info</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">psa_fwu_get_image_id_iterator</span><span class="p">(</span><span class="o">&amp;</span><span class="n">iter</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">do</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="n">psa_fwu_get_image_id</span><span class="p">(</span><span class="o">&amp;</span><span class="n">iter</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">id</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">rc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">psa_fwu_query</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">image_info</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">image_info</span><span class="p">.</span><span class="n">state</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PSA_IMAGE_INSTALLED</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">rc</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PSA_SUCCESS</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">specific_protocol_report</span><span class="p">(</span><span class="n">image_info</span><span class="p">.</span><span class="n">image_id</span><span class="p">,</span><span class="w"> </span><span class="n">image_info</span><span class="p">.</span><span class="n">version</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">psa_fwu_get_image_id_next</span><span class="p">());</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="individual-image-update-single-part-operation">
+<h2>Individual image update (single part operation)</h2>
+<p>A single image with no dependencies.</p>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;psa/update.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stddef.h&gt;</span><span class="c1"> /* not necessarily required */</span><span class="cp"></span>
+
+<span class="cm">/* Single image update */</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">example_install_single_image</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">image</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">image_size</span><span class="p">,</span><span class="w"> </span><span class="n">psa_image_id_t</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span>
+<span class="w">    </span><span class="n">psa_status_t</span><span class="w"> </span><span class="n">rc</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">psa_image_id_t</span><span class="w"> </span><span class="n">needed_image</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">psa_image_version_t</span><span class="w"> </span><span class="n">needed_version</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">rc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">psa_fwu_write</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">image</span><span class="p">,</span><span class="w"> </span><span class="n">image_size</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">needed_image</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">needed_version</span><span class="p">);</span><span class="w"></span>
+<span class="w">    </span><span class="n">rc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">psa_fwu_install</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">needed_image</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">needed_version</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">rc</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PSA_SUCCESS_REBOOT</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="cm">/* do other things and then eventually... */</span><span class="w"></span>
+<span class="w">        </span><span class="n">psa_fwu_request_reboot</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="cm">/* handle error */</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="invividual-image-update-multi-part-operation">
+<h2>Invividual image update (multi part operation)</h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;psa/update.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stddef.h&gt;</span><span class="c1"> /* not necessarily required */</span><span class="cp"></span>
+
+<span class="cm">/* Single image update (multi-part) */</span><span class="w"></span>
+<span class="kt">void</span><span class="w"> </span><span class="nf">example_install_single_image_multipart</span><span class="p">(</span><span class="kt">size_t</span><span class="w"> </span><span class="n">total_image_size</span><span class="p">,</span><span class="w"> </span><span class="n">psa_image_id_t</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">psa_status_t</span><span class="w"> </span><span class="n">rc</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">psa_image_id_t</span><span class="w"> </span><span class="n">needed_image</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">psa_image_version_t</span><span class="w"> </span><span class="n">needed_version</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">amount_to_send</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PSA_FWU_MAX_BLOCK_SIZE</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">image</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">offset</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">total_image_size</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="cm">/* Unrealistic example, fetches malloc&#39;d piece of image of size PSA_FWU_MAX_BLOCK_SIZE */</span><span class="w"></span>
+<span class="w">        </span><span class="n">image</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fetch_next_part_of_image</span><span class="p">(</span><span class="n">id</span><span class="p">);</span><span class="w"> </span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">((</span><span class="n">total_image_size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">offset</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">PSA_FWU_MAX_BLOCK_SIZE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">amount_to_send</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">total_image_size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">offset</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">rc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">psa_fwu_write</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="n">image</span><span class="p">[</span><span class="n">offset</span><span class="p">],</span><span class="w"> </span><span class="n">amount_to_send</span><span class="p">,</span><span class="w"> </span>
+<span class="w">                            </span><span class="o">&amp;</span><span class="n">needed_image</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">needed_version</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span>
+<span class="w">        </span><span class="n">free</span><span class="p">(</span><span class="n">image</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="n">offset</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">amount_to_send</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">rc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">psa_fwu_install</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">needed_image</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">needed_version</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">rc</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PSA_SUCCESS_REBOOT</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="cm">/* do other things and then eventually... */</span><span class="w"></span>
+<span class="w">        </span><span class="n">psa_fwu_request_reboot</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">rc</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PSA_SUCCESS</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="cm">/* Success */</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="cm">/* Handle error */</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</section>
+<section id="multiple-dependent-images-multi-part-operation">
+<h2>Multiple dependent images (multi part operation)</h2>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;psa/update.h&gt;</span><span class="cp"></span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stddef.h&gt;</span><span class="c1"> /* not necessarily required */</span><span class="cp"></span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">example_install_multiple_images</span><span class="p">(</span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">image</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">image_size</span><span class="p">,</span><span class="w"> </span><span class="n">psa_image_id_t</span><span class="w"> </span><span class="n">id</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">psa_fwu_ctx_t</span><span class="w"> </span><span class="n">ctx</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">psa_status_t</span><span class="w"> </span><span class="n">rc</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">psa_image_id_t</span><span class="w"> </span><span class="n">needed_image</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="n">psa_image_version_t</span><span class="w"> </span><span class="n">needed_version</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">offset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">size_t</span><span class="w"> </span><span class="n">amount_to_send</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PSA_FWU_MAX_BLOCK_SIZE</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">image_part</span><span class="p">;</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="n">offset</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">image_size</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">image_size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">offset</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="n">PSA_FWU_MAX_BLOCK_SIZE</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">amount_to_send</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">image_size</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">offset</span><span class="p">));</span><span class="w"></span>
+
+<span class="w">            </span><span class="n">rc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">psa_fwu_write</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">offset</span><span class="p">,</span><span class="w"> </span><span class="n">image</span><span class="p">[</span><span class="n">offset</span><span class="p">],</span><span class="w"> </span><span class="n">amount_to_send</span><span class="p">,</span><span class="w"> </span>
+<span class="w">                               </span><span class="o">&amp;</span><span class="n">needed_image</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">needed_version</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">offset</span><span class="w"> </span><span class="o">+=</span><span class="w"> </span><span class="n">amount_to_send</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">rc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">psa_fwu_install</span><span class="p">(</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">needed_image</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">needed_version</span><span class="p">);</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">rc</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PSA_SUCCESS_DEPENDENCY_NEEDED</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="cm">/* Image might need download or might already been downloaded */</span><span class="w"></span>
+<span class="w">            </span><span class="kt">int</span><span class="w"> </span><span class="n">new_image_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"></span>
+<span class="w">            </span><span class="kt">void</span><span class="w"> </span><span class="o">*</span><span class="n">new_image</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">retrieve_image_from_wherever</span><span class="p">(</span><span class="o">&amp;</span><span class="n">needed_image</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">needed_version</span><span class="p">,</span><span class="w"></span>
+<span class="w">                              </span><span class="o">&amp;</span><span class="n">new_image_size</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">example_install_multiple_images</span><span class="p">(</span><span class="n">new_image</span><span class="p">,</span><span class="w"> </span><span class="n">new_image_size</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">needed_image</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">rc</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PSA_SUCCESS_REBOOT</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="cm">/* do other things and then eventually... */</span><span class="w"></span>
+<span class="w">            </span><span class="n">psa_fwu_request_reboot</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">rc</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">PSA_SUCCESS</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="cm">/* other success */</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="cm">/* handle failures /*</span>
+<span class="cm">        }</span>
+<span class="cm">    }</span>
+<span class="cm">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3><a href="../index.html"><b>FWU API</b></a></h3>
+IHI 0093<br/>
+Non-confidential<br/>
+Version 0.7.0-bet.0
+<span style="color: red; font-weight: bold;"></span>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About this document</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html#design-goals">2. Design goals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html">3. Terminology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html#trust-model-and-scenarios">4. Trust model and scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">5. Design overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../image-formats.html">6. Image metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">7. API reference</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="example-header.html">Example header file</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Example usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#retrieve-versions-of-installed-images">Retrieve versions of installed images</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#individual-image-update-single-part-operation">Individual image update (single part operation)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#invividual-image-update-multi-part-operation">Invividual image update (multi part operation)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multiple-dependent-images-multi-part-operation">Multiple dependent images (multi part operation)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="future-changes.html">Future changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="change-history.html">Change history</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; 2020-2021, Arm Limited or its affiliates. All rights reserved.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

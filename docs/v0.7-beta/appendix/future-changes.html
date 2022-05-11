@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Future changes &#8212; FWU API 0.7.0-bet.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Change history" href="change-history.html" />
+    <link rel="prev" title="Example usage" href="examples.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="future-changes">
+<h1>Future changes</h1>
+<p id="futurechanges">We appreciate feedback from the technical community on this document.
+Feedback can be sent by e-mail to the following address <a class="reference external" href="mailto:arm&#46;psa-feedback&#37;&#52;&#48;arm&#46;com">arm<span>&#46;</span>psa-feedback<span>&#64;</span>arm<span>&#46;</span>com</a>.</p>
+<p>There are a number of anticipated changes that may affect future versions of this document.
+Feedback or preference on the open issues below would be appreciated.</p>
+<section id="rename-psa-fwu-abort">
+<h2>Rename psa_fwu_abort</h2>
+<p>The function <a class="reference internal" href="../api/update.html#c.psa_fwu_abort" title="psa_fwu_abort"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_abort</span></code></a> aborts any ongoing installation for the specified staging area and
+erases it. This may not be descriptive enough to applications that expect erase functions.</p>
+<p>It may be more intuitive to either:</p>
+<ul class="simple">
+<li><p>Rename <a class="reference internal" href="../api/update.html#c.psa_fwu_abort" title="psa_fwu_abort"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_abort</span></code></a> to <code class="docutils literal notranslate"><span class="pre">psa_fwu_erase</span></code></p></li>
+<li><p>Split the functionality into two functions: <a class="reference internal" href="../api/update.html#c.psa_fwu_abort" title="psa_fwu_abort"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_abort</span></code></a> and <code class="docutils literal notranslate"><span class="pre">psa_fwu_erase</span></code></p></li>
+</ul>
+</section>
+<section id="init-function">
+<h2>Init function</h2>
+<p>The current version of the API assumes that RAM has been allocated to the implementation.
+This may not be ideal in a simple library implementation, particularly if there
+is no <a class="reference internal" href="../about.html#term-spe"><span class="term">SPE</span></a> and the caller expects to manage all RAM usage.</p>
+<p>There are at least a couple of potential options:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">psa_fwu_init(void)</span></code> could be introduced to initialize the library, where applications must call before using any other function.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">psa_fwu_init(psa_fwu_ctx_t</span> <span class="pre">*</span> <span class="pre">context)</span></code> could be introduced to initialize the library, where applications must call before using any other function.
+This option allows the caller to specify where the library’s working RAM is allocated. The structure is an opauque one, allowing for
+different implementations. This option is the most intrusive change because the context variable would need to be added to the parameters of all the other API functions.</p></li>
+</ul>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3><a href="../index.html"><b>FWU API</b></a></h3>
+IHI 0093<br/>
+Non-confidential<br/>
+Version 0.7.0-bet.0
+<span style="color: red; font-weight: bold;"></span>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About this document</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html#design-goals">2. Design goals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html">3. Terminology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html#trust-model-and-scenarios">4. Trust model and scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">5. Design overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../image-formats.html">6. Image metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">7. API reference</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="example-header.html">Example header file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Example usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Future changes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#rename-psa-fwu-abort">Rename psa_fwu_abort</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#init-function">Init function</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="change-history.html">Change history</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; 2020-2021, Arm Limited or its affiliates. All rights reserved.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,1001 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>7.1. Library conventions &#8212; FWU API 0.7.0-bet.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Example header file" href="../appendix/example-header.html" />
+    <link rel="prev" title="7. API reference" href="index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <p id="api">The API is defined in the C language. The API make use of standard C data types
+as defined in the ISO C99 specification.</p>
+<section id="library-conventions">
+<h1>7.1. Library conventions</h1>
+<p>Almost all functions return a status indication of type <code class="docutils literal notranslate"><span class="pre">psa_status_t</span></code>.
+This is an enumeration of integer values, with the value 0 (<code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code>)
+or greater indicating
+successful operation and other values indicating errors.</p>
+<p>Unless specified otherwise, if multiple error conditions apply, an
+implementation is free to return any of the applicable error codes. The choice
+of error code is considered an implementation quality issue. Different
+implementations can make different choices, for example to favor code size
+over ease of debugging or vice versa.</p>
+<p>If the behavior is undefined, for example, if a function receives an invalid
+pointer as a parameter, this specification makes no guarantee that the function
+will return an error. Implementations are encouraged to return an error or halt
+the application in a manner that is appropriate for the platform if the
+undefined behavior condition can be detected. However, application developers
+need to be aware that undefined behavior conditions cannot be detected
+in general.</p>
+</section>
+<section id="behavior-on-error">
+<h1>7.2. Behavior on error</h1>
+<p>All function calls must be implemented atomically:</p>
+<ul class="simple">
+<li><p>When a function returns a type other than psa_status_t,
+the requested action has been carried out.</p></li>
+<li><p>When a function returns the status <code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code> or <code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS_xxx</span></code>, the requested action has
+been carried out.</p></li>
+<li><p>When a function returns another status of type psa_status_t, no action has
+been carried out. The content of the output parameters is undefined, but
+otherwise the state of the system has not changed, except as described below.</p></li>
+</ul>
+<p>Unless otherwise documented, the content of output parameters is not defined
+when a function returns a status other than <code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code>. It is recommended
+that implementations set output parameters to safe defaults to avoid limit
+risk, in case the caller does not properly handle all errors.</p>
+</section>
+<section id="pointer-conventions">
+<h1>7.3. Pointer conventions</h1>
+<p>Unless explicitly stated in the documentation of a function, all pointers
+must be valid pointers to an object of the specified type.</p>
+</section>
+<section id="macros">
+<h1>7.4. Macros</h1>
+<section id="library-versioning">
+<h2>7.4.1. Library versioning</h2>
+<section id="PSA_FWU_API_VERSION_MAJOR">
+<span id="c.PSA_FWU_API_VERSION_MAJOR"></span><h3><code class="docutils literal notranslate"><span class="pre">PSA_FWU_API_VERSION_MAJOR</span></code> (macro)</h3>
+<p>The major version of this implementation of the API.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_FWU_API_VERSION_MAJOR" title="PSA_FWU_API_VERSION_MAJOR">PSA_FWU_API_VERSION_MAJOR</a> 0</pre>
+</section>
+<section id="PSA_FWU_API_VERSION_MINOR">
+<span id="c.PSA_FWU_API_VERSION_MINOR"></span><h3><code class="docutils literal notranslate"><span class="pre">PSA_FWU_API_VERSION_MINOR</span></code> (macro)</h3>
+<p>The minor version of this implementation of the API.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_FWU_API_VERSION_MINOR" title="PSA_FWU_API_VERSION_MINOR">PSA_FWU_API_VERSION_MINOR</a> 7</pre>
+</section>
+</section>
+<section id="image-transfer">
+<h2>7.4.2. Image transfer</h2>
+<section id="PSA_FWU_MAX_BLOCK_SIZE">
+<span id="c.PSA_FWU_MAX_BLOCK_SIZE"></span><h3><code class="docutils literal notranslate"><span class="pre">PSA_FWU_MAX_BLOCK_SIZE</span></code> (macro)</h3>
+<p>The maximum permitted size for <code class="docutils literal notranslate"><span class="pre">block</span></code> in <a class="reference internal" href="#c.psa_fwu_write" title="psa_fwu_write"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_write</span></code></a>, in bytes.
+The specific value is <a class="reference internal" href="../about.html#term-implementation-defined"><span class="scterm">implementation defined</span></a> and must be greater than <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_FWU_MAX_BLOCK_SIZE" title="PSA_FWU_MAX_BLOCK_SIZE">PSA_FWU_MAX_BLOCK_SIZE</a> IMPDEF</pre>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Implementations that aim to support post quantum security are recommended
+to provide a minimum of 4096, especially if there is an intention to support stateful hash-based signatures.</p>
+</div>
+</section>
+</section>
+<section id="digest-size">
+<h2>7.4.3. Digest size</h2>
+<section id="PSA_FWU_MAX_DIGEST_SIZE">
+<span id="c.PSA_FWU_MAX_DIGEST_SIZE"></span><h3><code class="docutils literal notranslate"><span class="pre">PSA_FWU_MAX_DIGEST_SIZE</span></code> (macro)</h3>
+<p>The maximum size of an image digest, in bytes. This is dependent on the hash algorithm used. The value is <a class="reference internal" href="../about.html#term-implementation-defined"><span class="scterm">implementation defined</span></a>.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_FWU_MAX_DIGEST_SIZE" title="PSA_FWU_MAX_DIGEST_SIZE">PSA_FWU_MAX_DIGEST_SIZE</a> IMPDEF</pre>
+</section>
+</section>
+<section id="image-states">
+<h2>7.4.4. Image states</h2>
+<section id="PSA_IMAGE_UNDEFINED">
+<span id="c.PSA_IMAGE_UNDEFINED"></span><h3><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_UNDEFINED</span></code> (macro)</h3>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_IMAGE_UNDEFINED" title="PSA_IMAGE_UNDEFINED">PSA_IMAGE_UNDEFINED</a> 0</pre>
+</section>
+<section id="PSA_IMAGE_CANDIDATE">
+<span id="c.PSA_IMAGE_CANDIDATE"></span><h3><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_CANDIDATE</span></code> (macro)</h3>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_IMAGE_CANDIDATE" title="PSA_IMAGE_CANDIDATE">PSA_IMAGE_CANDIDATE</a> 1</pre>
+</section>
+<section id="PSA_IMAGE_INSTALLED">
+<span id="c.PSA_IMAGE_INSTALLED"></span><h3><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_INSTALLED</span></code> (macro)</h3>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_IMAGE_INSTALLED" title="PSA_IMAGE_INSTALLED">PSA_IMAGE_INSTALLED</a> 2</pre>
+</section>
+<section id="PSA_IMAGE_REJECTED">
+<span id="c.PSA_IMAGE_REJECTED"></span><h3><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_REJECTED</span></code> (macro)</h3>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_IMAGE_REJECTED" title="PSA_IMAGE_REJECTED">PSA_IMAGE_REJECTED</a> 3</pre>
+</section>
+<section id="PSA_IMAGE_PENDING_INSTALL">
+<span id="c.PSA_IMAGE_PENDING_INSTALL"></span><h3><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_PENDING_INSTALL</span></code> (macro)</h3>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_IMAGE_PENDING_INSTALL" title="PSA_IMAGE_PENDING_INSTALL">PSA_IMAGE_PENDING_INSTALL</a> 4</pre>
+</section>
+<section id="PSA_IMAGE_REBOOT_NEEDED">
+<span id="c.PSA_IMAGE_REBOOT_NEEDED"></span><h3><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_REBOOT_NEEDED</span></code> (macro)</h3>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_IMAGE_REBOOT_NEEDED" title="PSA_IMAGE_REBOOT_NEEDED">PSA_IMAGE_REBOOT_NEEDED</a> 5</pre>
+</section>
+</section>
+<section id="image-flags">
+<h2>7.4.5. Image flags</h2>
+<section id="PSA_IMAGE_FLAG_VOLATILE_STAGING">
+<span id="c.PSA_IMAGE_FLAG_VOLATILE_STAGING"></span><span id="flags"></span><h3><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_FLAG_VOLATILE_STAGING</span></code> (macro)</h3>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_IMAGE_FLAG_VOLATILE_STAGING" title="PSA_IMAGE_FLAG_VOLATILE_STAGING">PSA_IMAGE_FLAG_VOLATILE_STAGING</a> (0x00000001)</pre>
+<p>If set then image data written to the staging area will not maintained across a system reset.</p>
+<p>If not set then image data written to the staging area is guaranteed to exist after a system reset.</p>
+</section>
+<section id="PSA_IMAGE_FLAG_ENCRYPTION">
+<span id="c.PSA_IMAGE_FLAG_ENCRYPTION"></span><h3><code class="docutils literal notranslate"><span class="pre">PSA_IMAGE_FLAG_ENCRYPTION</span></code> (macro)</h3>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_IMAGE_FLAG_ENCRYPTION" title="PSA_IMAGE_FLAG_ENCRYPTION">PSA_IMAGE_FLAG_ENCRYPTION</a> (0x00000002)</pre>
+<p>This flag describes whether an image is encrypted or not during an update.</p>
+<p>If set then this type of image must be provided in encrypted form when installing.</p>
+<p>If not set then this type of image must be provided in unencrypted form when installing.</p>
+</section>
+</section>
+</section>
+<section id="types">
+<h1>7.5. Types</h1>
+<section id="psa_image_version_t">
+<span id="c.psa_image_version_t"></span><h2>7.5.1. <code class="docutils literal notranslate"><span class="pre">psa_image_version_t</span></code> (struct)</h2>
+<p>Version information about an image</p>
+<pre class="literal-block">typedef struct <a class="reference internal" href="#c.psa_image_version_t" title="psa_image_version_t">psa_image_version_t</a> {
+    uint16_t major;
+    uint16_t minor;
+    uint16_t patch;
+} <a class="reference internal" href="#c.psa_image_version_t" title="psa_image_version_t">psa_image_version_t</a>;</pre>
+<p class="rubric">Fields</p>
+<dl class="simple">
+<dt> <code class="docutils literal notranslate"><span class="pre">major</span></code></dt><dd><p>The major version of an image.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">minor</span></code></dt><dd><p>The minor version of an image. If the image has no minor version then
+this field is set to 0.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">patch</span></code></dt><dd><p>The patch version of an image. If the image has no patch version then
+this field is set to 0.</p>
+</dd>
+</dl>
+</section>
+<section id="psa_staging_info_t">
+<span id="c.psa_staging_info_t"></span><h2>7.5.2. <code class="docutils literal notranslate"><span class="pre">psa_staging_info_t</span></code> (struct)</h2>
+<p>A container with information about how to update the image.</p>
+<pre class="literal-block">typedef struct <a class="reference internal" href="#c.psa_staging_info_t" title="psa_staging_info_t">psa_staging_info_t</a> {
+    uint8_t flags;
+    uint8_t metadata_format;
+    size_t max_size;
+    <a class="reference internal" href="#c.psa_hash_t" title="psa_hash_t">psa_hash_t</a> key_id;
+} <a class="reference internal" href="#c.psa_staging_info_t" title="psa_staging_info_t">psa_staging_info_t</a>;</pre>
+<p class="rubric">Fields</p>
+<dl>
+<dt> <code class="docutils literal notranslate"><span class="pre">flags</span></code></dt><dd><p>A set of flags that describe extra information about the staging area.
+All unused flag values are reserved for future use by this specification and must be zero.</p>
+<p>See <a class="reference internal" href="#flags"><span class="std std-ref">PSA_IMAGE_FLAG_VOLATILE_STAGING (macro)</span></a> for the flag values.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">metadata_format</span></code></dt><dd><p>The expected format of the image’s signed metadata.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">max_size</span></code></dt><dd><p>The maximum possible size of the image in bytes.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">key_id</span></code></dt><dd><p>If <a class="reference internal" href="#c.PSA_IMAGE_FLAG_ENCRYPTION" title="PSA_IMAGE_FLAG_ENCRYPTION"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_IMAGE_FLAG_ENCRYPTION</span></code></a> is set in <code class="docutils literal notranslate"><span class="pre">flags</span></code> then this field contains the key identifier.
+The key identifier is a cryptographic hash of the decryption key.</p>
+<p>If <a class="reference internal" href="#c.PSA_IMAGE_FLAG_ENCRYPTION" title="PSA_IMAGE_FLAG_ENCRYPTION"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_IMAGE_FLAG_ENCRYPTION</span></code></a> is not set in <code class="docutils literal notranslate"><span class="pre">flags</span></code> then this field must be zero.</p>
+</dd>
+</dl>
+</section>
+<section id="psa_image_info_t">
+<span id="c.psa_image_info_t"></span><h2>7.5.3. <code class="docutils literal notranslate"><span class="pre">psa_image_info_t</span></code> (struct)</h2>
+<p>A container containing status information about an image.</p>
+<pre class="literal-block">typedef struct <a class="reference internal" href="#c.psa_image_info_t" title="psa_image_info_t">psa_image_info_t</a> {
+    struct <a class="reference internal" href="#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> image_id;
+    <a class="reference internal" href="#c.psa_uuid_t" title="psa_uuid_t">psa_uuid_t</a> vendor_id;
+    <a class="reference internal" href="#c.psa_uuid_t" title="psa_uuid_t">psa_uuid_t</a> class_id;
+    struct <a class="reference internal" href="#c.psa_image_version_t" title="psa_image_version_t">psa_image_version_t</a> version;
+    uint8_t state;
+    <a class="reference internal" href="#c.psa_staging_info_t" title="psa_staging_info_t">psa_staging_info_t</a> staging;
+    uint32_t error;
+    uint8_t digest[<a class="reference internal" href="#c.PSA_FWU_MAX_DIGEST_SIZE" title="PSA_FWU_MAX_DIGEST_SIZE">PSA_FWU_MAX_DIGEST_SIZE</a>];
+} <a class="reference internal" href="#c.psa_image_info_t" title="psa_image_info_t">psa_image_info_t</a>;</pre>
+<p class="rubric">Fields</p>
+<dl>
+<dt> <code class="docutils literal notranslate"><span class="pre">image_id</span></code></dt><dd><p>The assigned image ID.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">vendor_id</span></code></dt><dd><p>The expected vendor ID from the image metadata.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">class_id</span></code></dt><dd><p>The expected class ID from the image metadata.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">version</span></code></dt><dd><p>The version of the image.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">state</span></code></dt><dd><p>An integer that describes the current state of an image. Contains one of the following values:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#c.PSA_IMAGE_UNDEFINED" title="PSA_IMAGE_UNDEFINED"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_IMAGE_UNDEFINED</span></code></a></p></li>
+<li><p><a class="reference internal" href="#c.PSA_IMAGE_CANDIDATE" title="PSA_IMAGE_CANDIDATE"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_IMAGE_CANDIDATE</span></code></a></p></li>
+<li><p><a class="reference internal" href="#c.PSA_IMAGE_INSTALLED" title="PSA_IMAGE_INSTALLED"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_IMAGE_INSTALLED</span></code></a></p></li>
+<li><p><a class="reference internal" href="#c.PSA_IMAGE_REJECTED" title="PSA_IMAGE_REJECTED"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_IMAGE_REJECTED</span></code></a></p></li>
+<li><p><a class="reference internal" href="#c.PSA_IMAGE_PENDING_INSTALL" title="PSA_IMAGE_PENDING_INSTALL"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_IMAGE_PENDING_INSTALL</span></code></a></p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>I think we want this information to be richer and extensible.
+For example, we could define a range of values defined by Arm and a range of values for implementers.
+For example. An implementation can provide extra information
+for debug reasons.</p>
+</div>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">staging</span></code></dt><dd><p>A container with information about how to update the image.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">error</span></code></dt><dd><blockquote>
+<div><p>An application-specific error that caused the firmware to roll back. If <a class="reference internal" href="#c.psa_fwu_request_rollback" title="psa_fwu_request_rollback"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_request_rollback</span></code></a> is not supported,
+then this field must be 0.</p>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>What about error codes from bootloader? Are there use cases for a bootloader sending a dynamic amount of data?</p>
+</div>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">digest</span></code></dt><dd><p>The digest of the image.</p>
+</dd>
+</dl>
+</section>
+<section id="psa_uuid_t">
+<span id="c.psa_uuid_t"></span><h2>7.5.4. <code class="docutils literal notranslate"><span class="pre">psa_uuid_t</span></code> (struct)</h2>
+<p>A 128-bit universally unique identifier. UUIDs MUST be created according to <span><em>A Universally Unique IDentifier (UUID) URN Namespace</em> <a class="reference internal" href="../about.html#citation-rfc4122"><span class="cite">[RFC4122]</span></a></span>.  UUIDs should
+use versions 3, 4, or 5.</p>
+<pre class="literal-block">typedef struct <a class="reference internal" href="#c.psa_uuid_t" title="psa_uuid_t">psa_uuid_t</a> {
+    uint32_t uuid[4];
+} <a class="reference internal" href="#c.psa_uuid_t" title="psa_uuid_t">psa_uuid_t</a>;</pre>
+<p class="rubric">Fields</p>
+<dl class="simple">
+<dt> <code class="docutils literal notranslate"><span class="pre">uuid</span></code></dt><dd></dd>
+</dl>
+</section>
+<section id="psa_image_id_t">
+<span id="c.psa_image_id_t"></span><h2>7.5.5. <code class="docutils literal notranslate"><span class="pre">psa_image_id_t</span></code> (type)</h2>
+<p>A fixed size integer for the type of image that needs installing.
+This ID can be returned by a dependency error from <a class="reference internal" href="#c.psa_fwu_install" title="psa_fwu_install"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_install</span></code></a>.
+The caller must use the ID to download or locate the appropriate image
+to install.</p>
+<pre class="literal-block">typedef uint32_t <a class="reference internal" href="#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a>;</pre>
+</section>
+<section id="psa_fwu_iterator_t">
+<span id="c.psa_fwu_iterator_t"></span><h2>7.5.6. <code class="docutils literal notranslate"><span class="pre">psa_fwu_iterator_t</span></code> (type)</h2>
+<p>An iterator object. Used with <a class="reference internal" href="#c.psa_fwu_query" title="psa_fwu_query"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_query</span></code></a> to iterate through all the
+image information.</p>
+<p>The definition is <a class="reference internal" href="../about.html#term-implementation-defined"><span class="scterm">implementation defined</span></a>.</p>
+<pre class="literal-block">typedef <em>/*...*/</em> <a class="reference internal" href="#c.psa_fwu_iterator_t" title="psa_fwu_iterator_t">psa_fwu_iterator_t</a>;</pre>
+</section>
+<section id="psa_hash_t">
+<span id="c.psa_hash_t"></span><h2>7.5.7. <code class="docutils literal notranslate"><span class="pre">psa_hash_t</span></code> (struct)</h2>
+<p>A cryptographic hash.</p>
+<pre class="literal-block">struct <a class="reference internal" href="#c.psa_hash_t" title="psa_hash_t">psa_hash_t</a> {
+    uint8_t value[<a class="reference internal" href="#c.PSA_FWU_MAX_DIGEST_SIZE" title="PSA_FWU_MAX_DIGEST_SIZE">PSA_FWU_MAX_DIGEST_SIZE</a>];
+};</pre>
+<p class="rubric">Fields</p>
+<dl class="simple">
+<dt> <code class="docutils literal notranslate"><span class="pre">value</span></code></dt><dd></dd>
+</dl>
+</section>
+</section>
+<section id="status-codes">
+<h1>7.6. Status codes</h1>
+<section id="psa_status_t">
+<span id="c.psa_status_t"></span><h2>7.6.1. <code class="docutils literal notranslate"><span class="pre">psa_status_t</span></code> (type)</h2>
+<p>Function return status.</p>
+<pre class="literal-block">typedef int32_t <a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>;</pre>
+<p>This is either <a class="reference internal" href="#c.PSA_SUCCESS" title="PSA_SUCCESS"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code></a>, which is zero, indicating success; or a small negative value indicating that an error occurred. Errors are encoded as one of the <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_xxx</span></code> values defined here.</p>
+</section>
+<section id="PSA_SUCCESS">
+<span id="c.PSA_SUCCESS"></span><h2>7.6.2. <code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code> (macro)</h2>
+<p>The action was completed successfully.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_SUCCESS" title="PSA_SUCCESS">PSA_SUCCESS</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)0)</pre>
+</section>
+<section id="PSA_SUCCESS_REBOOT">
+<span id="c.PSA_SUCCESS_REBOOT"></span><h2>7.6.3. <code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS_REBOOT</span></code> (macro)</h2>
+<p>The action was completed successfully and requires a system reboot to complete installation.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_SUCCESS_REBOOT" title="PSA_SUCCESS_REBOOT">PSA_SUCCESS_REBOOT</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)+1)</pre>
+</section>
+<section id="PSA_SUCCESS_RESTART">
+<span id="c.PSA_SUCCESS_RESTART"></span><h2>7.6.4. <code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS_RESTART</span></code> (macro)</h2>
+<p>The action was completed successfully and requires a restart of the component to complete installation.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_SUCCESS_RESTART" title="PSA_SUCCESS_RESTART">PSA_SUCCESS_RESTART</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)+2)</pre>
+</section>
+<section id="PSA_SUCCESS_DEPENDENCY_NEEDED">
+<span id="c.PSA_SUCCESS_DEPENDENCY_NEEDED"></span><h2>7.6.5. <code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS_DEPENDENCY_NEEDED</span></code> (macro)</h2>
+<p>The action was completed successfully and requires the installation of a dependency to complete installation.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_SUCCESS_DEPENDENCY_NEEDED" title="PSA_SUCCESS_DEPENDENCY_NEEDED">PSA_SUCCESS_DEPENDENCY_NEEDED</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)+3)</pre>
+</section>
+</section>
+<section id="error-codes">
+<h1>7.7. Error codes</h1>
+<p>The following are the possible error codes that can be returned to the caller.</p>
+<section id="PSA_ERROR_GENERIC_ERROR">
+<span id="c.PSA_ERROR_GENERIC_ERROR"></span><h2>7.7.1. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_GENERIC_ERROR</span></code> (macro)</h2>
+<p>An error occurred that does not correspond to any defined failure cause.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_GENERIC_ERROR" title="PSA_ERROR_GENERIC_ERROR">PSA_ERROR_GENERIC_ERROR</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-132)</pre>
+<p>Implementations can use this error code if none of the other standard error codes are applicable.</p>
+</section>
+<section id="PSA_ERROR_NOT_SUPPORTED">
+<span id="c.PSA_ERROR_NOT_SUPPORTED"></span><h2>7.7.2. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_SUPPORTED</span></code> (macro)</h2>
+<p>The requested operation or a parameter is not supported by this implementation.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_NOT_SUPPORTED" title="PSA_ERROR_NOT_SUPPORTED">PSA_ERROR_NOT_SUPPORTED</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-134)</pre>
+<p>If a combination of parameters is recognized and identified as not valid, return <a class="reference internal" href="#c.PSA_ERROR_INVALID_ARGUMENT" title="PSA_ERROR_INVALID_ARGUMENT"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_ARGUMENT</span></code></a> instead.</p>
+</section>
+<section id="PSA_ERROR_NOT_PERMITTED">
+<span id="c.PSA_ERROR_NOT_PERMITTED"></span><h2>7.7.3. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_PERMITTED</span></code> (macro)</h2>
+<p>The requested action is denied by a policy.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_NOT_PERMITTED" title="PSA_ERROR_NOT_PERMITTED">PSA_ERROR_NOT_PERMITTED</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-133)</pre>
+<p>It is recommended that implementations return this error code when the parameters are recognized as valid and supported, and a policy explicitly denies the requested operation.</p>
+<p>If a subset of the parameters of a function call identify a forbidden operation, and another subset of the parameters are not valid or not supported, it is unspecified whether the function returns <a class="reference internal" href="#c.PSA_ERROR_NOT_PERMITTED" title="PSA_ERROR_NOT_PERMITTED"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_PERMITTED</span></code></a>, <a class="reference internal" href="#c.PSA_ERROR_NOT_SUPPORTED" title="PSA_ERROR_NOT_SUPPORTED"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_SUPPORTED</span></code></a> or <a class="reference internal" href="#c.PSA_ERROR_INVALID_ARGUMENT" title="PSA_ERROR_INVALID_ARGUMENT"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_ARGUMENT</span></code></a>.</p>
+</section>
+<section id="PSA_ERROR_DOES_NOT_EXIST">
+<span id="c.PSA_ERROR_DOES_NOT_EXIST"></span><h2>7.7.4. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DOES_NOT_EXIST</span></code> (macro)</h2>
+<p>Asking for an item that doesn’t exist.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_DOES_NOT_EXIST" title="PSA_ERROR_DOES_NOT_EXIST">PSA_ERROR_DOES_NOT_EXIST</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-140)</pre>
+</section>
+<section id="PSA_ERROR_INVALID_ARGUMENT">
+<span id="c.PSA_ERROR_INVALID_ARGUMENT"></span><h2>7.7.5. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_ARGUMENT</span></code> (macro)</h2>
+<p>The parameters passed to the function are invalid.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_INVALID_ARGUMENT" title="PSA_ERROR_INVALID_ARGUMENT">PSA_ERROR_INVALID_ARGUMENT</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-135)</pre>
+<p>Implementations can return this error any time a parameter or combination of parameters are recognized as invalid.</p>
+</section>
+<section id="PSA_ERROR_INSUFFICIENT_MEMORY">
+<span id="c.PSA_ERROR_INSUFFICIENT_MEMORY"></span><h2>7.7.6. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_MEMORY</span></code> (macro)</h2>
+<p>There is not enough runtime memory.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_INSUFFICIENT_MEMORY" title="PSA_ERROR_INSUFFICIENT_MEMORY">PSA_ERROR_INSUFFICIENT_MEMORY</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-141)</pre>
+<p>If the action is carried out across multiple security realms, this error can refer to available memory in any of the security realms.</p>
+</section>
+<section id="PSA_ERROR_INSUFFICIENT_STORAGE">
+<span id="c.PSA_ERROR_INSUFFICIENT_STORAGE"></span><h2>7.7.7. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_STORAGE</span></code> (macro)</h2>
+<p>There is not enough persistent storage.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_INSUFFICIENT_STORAGE" title="PSA_ERROR_INSUFFICIENT_STORAGE">PSA_ERROR_INSUFFICIENT_STORAGE</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-142)</pre>
+<p>Functions that modify the key storage return this error code if there is insufficient storage space on the host media. In addition, many functions that do not otherwise access storage might return this error code if the implementation requires a mandatory log entry for the requested action and the log storage space is full.</p>
+</section>
+<section id="PSA_ERROR_COMMUNICATION_FAILURE">
+<span id="c.PSA_ERROR_COMMUNICATION_FAILURE"></span><h2>7.7.8. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_COMMUNICATION_FAILURE</span></code> (macro)</h2>
+<p>There was a communication failure inside the implementation.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_COMMUNICATION_FAILURE" title="PSA_ERROR_COMMUNICATION_FAILURE">PSA_ERROR_COMMUNICATION_FAILURE</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-145)</pre>
+<p>This can indicate a communication failure between the application and an external processor or between the processor and an external volatile or persistent memory. A communication failure can be transient or permanent depending on the cause.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If a function returns this error, it is undetermined whether the requested action has completed. Returning <a class="reference internal" href="#c.PSA_SUCCESS" title="PSA_SUCCESS"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code></a> is recommended on successful completion whenever possible, however functions can return <a class="reference internal" href="#c.PSA_ERROR_COMMUNICATION_FAILURE" title="PSA_ERROR_COMMUNICATION_FAILURE"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_COMMUNICATION_FAILURE</span></code></a> if the requested action was completed successfully in an external processor but there was a breakdown of communication before the processor could report the status to the application.</p>
+</div>
+</section>
+<section id="PSA_ERROR_STORAGE_FAILURE">
+<span id="c.PSA_ERROR_STORAGE_FAILURE"></span><h2>7.7.9. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_STORAGE_FAILURE</span></code> (macro)</h2>
+<p>There was a storage failure that might have led to data loss.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_STORAGE_FAILURE" title="PSA_ERROR_STORAGE_FAILURE">PSA_ERROR_STORAGE_FAILURE</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-146)</pre>
+<p>This error indicates that some persistent storage could not be read or written by the implementation. It does not indicate the following situations, which have specific error codes:</p>
+<ul class="simple">
+<li><p>A corruption of volatile memory - use <a class="reference internal" href="#c.PSA_ERROR_CORRUPTION_DETECTED" title="PSA_ERROR_CORRUPTION_DETECTED"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_CORRUPTION_DETECTED</span></code></a>.</p></li>
+<li><p>A communication error between the processor and its external storage - use <a class="reference internal" href="#c.PSA_ERROR_COMMUNICATION_FAILURE" title="PSA_ERROR_COMMUNICATION_FAILURE"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_COMMUNICATION_FAILURE</span></code></a>.</p></li>
+<li><p>When the storage is in a valid state but is full - use <a class="reference internal" href="#c.PSA_ERROR_INSUFFICIENT_STORAGE" title="PSA_ERROR_INSUFFICIENT_STORAGE"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_STORAGE</span></code></a>.</p></li>
+<li><p>When the storage or stored data is corrupted - use <a class="reference internal" href="#c.PSA_ERROR_DATA_CORRUPT" title="PSA_ERROR_DATA_CORRUPT"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_DATA_CORRUPT</span></code></a>.</p></li>
+<li><p>When the stored data is not valid - use <a class="reference internal" href="#c.PSA_ERROR_DATA_INVALID" title="PSA_ERROR_DATA_INVALID"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_DATA_INVALID</span></code></a>.</p></li>
+</ul>
+<p>A storage failure does not indicate that any data that was previously read is invalid. However this previously read data might no longer be readable from storage.</p>
+<p>When a storage failure occurs, it is no longer possible to ensure the global integrity of the keystore. Depending on the global integrity guarantees offered by the implementation, access to other data might fail even if the data is still readable but its integrity cannot be guaranteed.</p>
+<p>It is recommended to only use this error code to report a permanent storage corruption. However application writers must keep in mind that transient errors while reading the storage might be reported using this error code.</p>
+</section>
+<section id="PSA_ERROR_DATA_CORRUPT">
+<span id="c.PSA_ERROR_DATA_CORRUPT"></span><h2>7.7.10. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DATA_CORRUPT</span></code> (macro)</h2>
+<p>Stored data has been corrupted.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_DATA_CORRUPT" title="PSA_ERROR_DATA_CORRUPT">PSA_ERROR_DATA_CORRUPT</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-152)</pre>
+<p>This error indicates that some persistent storage has suffered corruption.  It does not indicate the following situations, which have specific error codes:</p>
+<ul class="simple">
+<li><p>A corruption of volatile memory - use <a class="reference internal" href="#c.PSA_ERROR_CORRUPTION_DETECTED" title="PSA_ERROR_CORRUPTION_DETECTED"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_CORRUPTION_DETECTED</span></code></a>.</p></li>
+<li><p>A communication error between the processor and its external storage - use <a class="reference internal" href="#c.PSA_ERROR_COMMUNICATION_FAILURE" title="PSA_ERROR_COMMUNICATION_FAILURE"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_COMMUNICATION_FAILURE</span></code></a>.</p></li>
+<li><p>When the storage is in a valid state but is full - use <a class="reference internal" href="#c.PSA_ERROR_INSUFFICIENT_STORAGE" title="PSA_ERROR_INSUFFICIENT_STORAGE"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_STORAGE</span></code></a>.</p></li>
+<li><p>When the storage fails for other reasons - use <a class="reference internal" href="#c.PSA_ERROR_STORAGE_FAILURE" title="PSA_ERROR_STORAGE_FAILURE"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_STORAGE_FAILURE</span></code></a>.</p></li>
+<li><p>When the stored data is not valid - use <a class="reference internal" href="#c.PSA_ERROR_DATA_INVALID" title="PSA_ERROR_DATA_INVALID"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_DATA_INVALID</span></code></a>.</p></li>
+</ul>
+<p>Note that a storage corruption does not indicate that any data that was previously read is invalid. However this previously read data might no longer be readable from storage.</p>
+<p>When a storage failure occurs, it is no longer possible to ensure the global integrity of the keystore. Depending on the global integrity guarantees offered by the implementation, access to other data might fail even if the data is still readable but its integrity cannot be guaranteed.</p>
+<p>It is recommended to only use this error code to report when a storage component indicates that the stored data is corrupt, or fails an integrity check.</p>
+</section>
+<section id="PSA_ERROR_DATA_INVALID">
+<span id="c.PSA_ERROR_DATA_INVALID"></span><h2>7.7.11. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DATA_INVALID</span></code> (macro)</h2>
+<p>Data read from storage is not valid for the implementation.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_DATA_INVALID" title="PSA_ERROR_DATA_INVALID">PSA_ERROR_DATA_INVALID</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-153)</pre>
+<p>This error indicates that some data read from storage does not have a valid format. It does not indicate the following situations, which have specific error codes:</p>
+<ul class="simple">
+<li><p>When the storage or stored data is corrupted - use <a class="reference internal" href="#c.PSA_ERROR_DATA_CORRUPT" title="PSA_ERROR_DATA_CORRUPT"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_DATA_CORRUPT</span></code></a>.</p></li>
+<li><p>When the storage fails for other reasons - use <a class="reference internal" href="#c.PSA_ERROR_STORAGE_FAILURE" title="PSA_ERROR_STORAGE_FAILURE"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_STORAGE_FAILURE</span></code></a>.</p></li>
+<li><p>An invalid argument to the API - use <a class="reference internal" href="#c.PSA_ERROR_INVALID_ARGUMENT" title="PSA_ERROR_INVALID_ARGUMENT"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_ARGUMENT</span></code></a>.</p></li>
+</ul>
+<p>This error is typically a result of an integration failure, where the implementation reading the data is not compatible with the implementation that stored the data.</p>
+<p>It is recommended to only use this error code to report when data that is successfully read from storage is invalid.</p>
+</section>
+<section id="PSA_ERROR_HARDWARE_FAILURE">
+<span id="c.PSA_ERROR_HARDWARE_FAILURE"></span><h2>7.7.12. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_HARDWARE_FAILURE</span></code> (macro)</h2>
+<p>A hardware failure was detected.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_HARDWARE_FAILURE" title="PSA_ERROR_HARDWARE_FAILURE">PSA_ERROR_HARDWARE_FAILURE</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-147)</pre>
+<p>A hardware failure can be transient or permanent depending on the cause.</p>
+</section>
+<section id="PSA_ERROR_CORRUPTION_DETECTED">
+<span id="c.PSA_ERROR_CORRUPTION_DETECTED"></span><h2>7.7.13. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_CORRUPTION_DETECTED</span></code> (macro)</h2>
+<p>A tampering attempt was detected.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_CORRUPTION_DETECTED" title="PSA_ERROR_CORRUPTION_DETECTED">PSA_ERROR_CORRUPTION_DETECTED</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-151)</pre>
+<p>If an application receives this error code, there is no guarantee that previously accessed or computed data was correct and remains confidential. In this situation, it is recommended that applications perform no further security functions and enter a safe failure state.</p>
+<p>Implementations can return this error code if they detect an invalid state that cannot happen during normal operation and that indicates that the implementation’s security guarantees no longer hold. Depending on the implementation architecture and on its security and safety goals, the implementation might forcibly terminate the application.</p>
+<p>This error indicates an attack against the application. Implementations must not return this error code as a consequence of the behavior of the application itself.</p>
+</section>
+<section id="PSA_ERROR_INVALID_SIGNATURE">
+<span id="c.PSA_ERROR_INVALID_SIGNATURE"></span><h2>7.7.14. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_SIGNATURE</span></code> (macro)</h2>
+<p>The signature, MAC or hash is incorrect.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_INVALID_SIGNATURE" title="PSA_ERROR_INVALID_SIGNATURE">PSA_ERROR_INVALID_SIGNATURE</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-149)</pre>
+<p>Verification functions return this error if the verification calculations completed successfully, and the value to be verified was determined to be incorrect.</p>
+<p>If the value to verify has an invalid size, implementations can return either <a class="reference internal" href="#c.PSA_ERROR_INVALID_ARGUMENT" title="PSA_ERROR_INVALID_ARGUMENT"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_ARGUMENT</span></code></a> or <a class="reference internal" href="#c.PSA_ERROR_INVALID_SIGNATURE" title="PSA_ERROR_INVALID_SIGNATURE"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_SIGNATURE</span></code></a>.</p>
+</section>
+<section id="PSA_ERROR_INSUFFICIENT_DATA">
+<span id="c.PSA_ERROR_INSUFFICIENT_DATA"></span><h2>7.7.15. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_DATA</span></code> (macro)</h2>
+<p>Return this error when there’s insufficient data when attempting to read from a resource.</p>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_INSUFFICIENT_DATA" title="PSA_ERROR_INSUFFICIENT_DATA">PSA_ERROR_INSUFFICIENT_DATA</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-143)</pre>
+</section>
+<section id="PSA_ERROR_WRONG_DEVICE">
+<span id="c.PSA_ERROR_WRONG_DEVICE"></span><h2>7.7.16. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_WRONG_DEVICE</span></code> (macro)</h2>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_WRONG_DEVICE" title="PSA_ERROR_WRONG_DEVICE">PSA_ERROR_WRONG_DEVICE</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-155)</pre>
+</section>
+<section id="PSA_ERROR_DEPENDENCY_NEEDED">
+<span id="c.PSA_ERROR_DEPENDENCY_NEEDED"></span><h2>7.7.17. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DEPENDENCY_NEEDED</span></code> (macro)</h2>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_DEPENDENCY_NEEDED" title="PSA_ERROR_DEPENDENCY_NEEDED">PSA_ERROR_DEPENDENCY_NEEDED</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-156)</pre>
+</section>
+<section id="PSA_ERROR_CURRENTLY_INSTALLING">
+<span id="c.PSA_ERROR_CURRENTLY_INSTALLING"></span><h2>7.7.18. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_CURRENTLY_INSTALLING</span></code> (macro)</h2>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_CURRENTLY_INSTALLING" title="PSA_ERROR_CURRENTLY_INSTALLING">PSA_ERROR_CURRENTLY_INSTALLING</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-157)</pre>
+</section>
+<section id="PSA_ERROR_ALREADY_INSTALLED">
+<span id="c.PSA_ERROR_ALREADY_INSTALLED"></span><h2>7.7.19. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_ALREADY_INSTALLED</span></code> (macro)</h2>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_ALREADY_INSTALLED" title="PSA_ERROR_ALREADY_INSTALLED">PSA_ERROR_ALREADY_INSTALLED</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-158)</pre>
+</section>
+<section id="PSA_ERROR_INSTALL_INTERRUPTED">
+<span id="c.PSA_ERROR_INSTALL_INTERRUPTED"></span><h2>7.7.20. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSTALL_INTERRUPTED</span></code> (macro)</h2>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_INSTALL_INTERRUPTED" title="PSA_ERROR_INSTALL_INTERRUPTED">PSA_ERROR_INSTALL_INTERRUPTED</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-159)</pre>
+</section>
+<section id="PSA_ERROR_FLASH_ABUSE">
+<span id="c.PSA_ERROR_FLASH_ABUSE"></span><h2>7.7.21. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_FLASH_ABUSE</span></code> (macro)</h2>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_FLASH_ABUSE" title="PSA_ERROR_FLASH_ABUSE">PSA_ERROR_FLASH_ABUSE</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-160)</pre>
+</section>
+<section id="PSA_ERROR_INSUFFICIENT_POWER">
+<span id="c.PSA_ERROR_INSUFFICIENT_POWER"></span><h2>7.7.22. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_POWER</span></code> (macro)</h2>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_INSUFFICIENT_POWER" title="PSA_ERROR_INSUFFICIENT_POWER">PSA_ERROR_INSUFFICIENT_POWER</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-161)</pre>
+</section>
+<section id="PSA_ERROR_DECRYPTION_FAILURE">
+<span id="c.PSA_ERROR_DECRYPTION_FAILURE"></span><h2>7.7.23. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DECRYPTION_FAILURE</span></code> (macro)</h2>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_DECRYPTION_FAILURE" title="PSA_ERROR_DECRYPTION_FAILURE">PSA_ERROR_DECRYPTION_FAILURE</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-162)</pre>
+</section>
+<section id="PSA_ERROR_MISSING_MANIFEST">
+<span id="c.PSA_ERROR_MISSING_MANIFEST"></span><h2>7.7.24. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_MISSING_MANIFEST</span></code> (macro)</h2>
+<pre class="literal-block">#define <a class="reference internal" href="#c.PSA_ERROR_MISSING_MANIFEST" title="PSA_ERROR_MISSING_MANIFEST">PSA_ERROR_MISSING_MANIFEST</a> ((<a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-163)</pre>
+</section>
+</section>
+<section id="functions">
+<h1>7.8. Functions</h1>
+<section id="psa_fwu_query">
+<span id="c.psa_fwu_query"></span><h2>7.8.1. <code class="docutils literal notranslate"><span class="pre">psa_fwu_query</span></code> (function)</h2>
+<p>Returns information for an image of a particular image ID.</p>
+<pre class="literal-block"><a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="#c.psa_fwu_query" title="psa_fwu_query">psa_fwu_query</a>(<a class="reference internal" href="#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> image_id,
+                           <a class="reference internal" href="#c.psa_image_info_t" title="psa_image_info_t">psa_image_info_t</a> *info);</pre>
+<p class="rubric">Parameters</p>
+<dl class="simple">
+<dt> <code class="docutils literal notranslate"><span class="pre">image_id</span></code></dt><dd><p>The image ID of the image to query.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">info</span></code></dt><dd><p>Output parameter for image information related to the image ID.</p>
+</dd>
+</dl>
+<p class="rubric">Returns: <a class="reference internal" href="#c.psa_status_t" title="psa_status_t"><code class="docutils literal notranslate"><span class="pre">psa_status_t</span></code></a></p>
+<dl class="simple">
+<dt> <a class="reference internal" href="#c.PSA_SUCCESS" title="PSA_SUCCESS"><code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code></a></dt><dd><p>Image information has been returned.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_NOT_PERMITTED" title="PSA_ERROR_NOT_PERMITTED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_PERMITTED</span></code></a></dt><dd><p>The caller is not authorized to access platform version information.</p>
+</dd>
+</dl>
+</section>
+<section id="psa_fwu_set_manifest">
+<span id="c.psa_fwu_set_manifest"></span><h2>7.8.2. <code class="docutils literal notranslate"><span class="pre">psa_fwu_set_manifest</span></code> (function)</h2>
+<p>Stores a manifest object and associates it with a particular image ID.</p>
+<p>This function is optional, and if not implemented shall return <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_SUPPORTED</span></code>.</p>
+<pre class="literal-block"><a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="#c.psa_fwu_set_manifest" title="psa_fwu_set_manifest">psa_fwu_set_manifest</a>(<a class="reference internal" href="#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> image_id,
+                                  const void *manifest,
+                                  size_t manifest_size,
+                                  <a class="reference internal" href="#c.psa_hash_t" title="psa_hash_t">psa_hash_t</a> *manifest_dependency);</pre>
+<p class="rubric">Parameters</p>
+<dl class="simple">
+<dt> <code class="docutils literal notranslate"><span class="pre">image_id</span></code></dt><dd><p>The identifier of the image type.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">manifest</span></code></dt><dd><p>A pointer to a buffer containing a manifest object.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">manifest_size</span></code></dt><dd><p>The size of the manifest parameter.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">manifest_dependency</span></code></dt><dd><p>Output parameter containing the hash of a required manifest when <a class="reference internal" href="#c.PSA_ERROR_DEPENDENCY_NEEDED" title="PSA_ERROR_DEPENDENCY_NEEDED"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_DEPENDENCY_NEEDED</span></code></a> is returned.</p>
+</dd>
+</dl>
+<p class="rubric">Returns: <a class="reference internal" href="#c.psa_status_t" title="psa_status_t"><code class="docutils literal notranslate"><span class="pre">psa_status_t</span></code></a></p>
+<dl>
+<dt> <a class="reference internal" href="#c.PSA_SUCCESS" title="PSA_SUCCESS"><code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code></a></dt><dd><p>The manifest is persisted.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_NOT_PERMITTED" title="PSA_ERROR_NOT_PERMITTED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_PERMITTED</span></code></a></dt><dd><p>The manifest is too old to be installed.
+If the image metadata contains a timestamp, and it has expired,
+then this error is also returned.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_WRONG_DEVICE" title="PSA_ERROR_WRONG_DEVICE"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_WRONG_DEVICE</span></code></a></dt><dd><p>The manifest is not intended for this device.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_INVALID_SIGNATURE" title="PSA_ERROR_INVALID_SIGNATURE"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_SIGNATURE</span></code></a></dt><dd><p>The manifest signature is not valid.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_DEPENDENCY_NEEDED" title="PSA_ERROR_DEPENDENCY_NEEDED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DEPENDENCY_NEEDED</span></code></a></dt><dd><p>A different manifest is needed.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_INVALID_ARGUMENT" title="PSA_ERROR_INVALID_ARGUMENT"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_ARGUMENT</span></code></a></dt><dd><p>Parameter size is 0 or a pointer parameter is NULL.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_COMMUNICATION_FAILURE" title="PSA_ERROR_COMMUNICATION_FAILURE"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_COMMUNICATION_FAILURE</span></code></a></dt><dd><blockquote>
+<div><p>The system could not communicate with the installer.</p>
+</div></blockquote>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_NOT_SUPPORTED" title="PSA_ERROR_NOT_SUPPORTED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_SUPPORTED</span></code></a></dt><dd><p>This function is not implemented.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_CURRENTLY_INSTALLING" title="PSA_ERROR_CURRENTLY_INSTALLING"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_CURRENTLY_INSTALLING</span></code></a></dt><dd><p>An existing manifest for image ID is currently being installed and is locked from writing.
+For example, <a class="reference internal" href="#c.psa_fwu_install" title="psa_fwu_install"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_install</span></code></a> is currently executing.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_GENERIC_ERROR" title="PSA_ERROR_GENERIC_ERROR"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_GENERIC_ERROR</span></code></a></dt><dd><p>A fatal error occured.</p>
+</dd>
+</dl>
+<p class="rubric">Description</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Rationale</strong></p>
+<p>It is better to have a separate function for manifest related data
+rather than overload existing functions. Otherwise, we burden
+non-manifest users with configuring parameters correctly.</p>
+<p>Similarly, if a system does not support a manifest, this
+function can not be supported using PSA_ERROR_NOT_SUPPORTED.</p>
+</div>
+</section>
+<section id="psa_fwu_write">
+<span id="c.psa_fwu_write"></span><h2>7.8.3. <code class="docutils literal notranslate"><span class="pre">psa_fwu_write</span></code> (function)</h2>
+<p>Writes an image to its staging area.</p>
+<p>If the image size is less than or equal to <a class="reference internal" href="#c.PSA_FWU_MAX_BLOCK_SIZE" title="PSA_FWU_MAX_BLOCK_SIZE"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_FWU_MAX_BLOCK_SIZE</span></code></a>, the caller can
+send the entire image in one call.</p>
+<p>If the image size is greater than <a class="reference internal" href="#c.PSA_FWU_MAX_BLOCK_SIZE" title="PSA_FWU_MAX_BLOCK_SIZE"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_FWU_MAX_BLOCK_SIZE</span></code></a>, the caller
+must send parts of the image by calling <a class="reference internal" href="#c.psa_fwu_write" title="psa_fwu_write"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_write</span></code></a> multiple times
+with different data blocks.</p>
+<p>Once complete, the caller calls <a class="reference internal" href="#c.psa_fwu_install" title="psa_fwu_install"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_install</span></code></a> to install the candidate image.</p>
+<pre class="literal-block"><a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="#c.psa_fwu_write" title="psa_fwu_write">psa_fwu_write</a>(<a class="reference internal" href="#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> image_id,
+                           size_t image_offset,
+                           const void *block,
+                           size_t block_size);</pre>
+<p class="rubric">Parameters</p>
+<dl class="simple">
+<dt> <code class="docutils literal notranslate"><span class="pre">image_id</span></code></dt><dd><p>The identifier of the image type.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">image_offset</span></code></dt><dd><p>The offset of the image being passed into <code class="docutils literal notranslate"><span class="pre">block</span></code>, in bytes.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">block</span></code></dt><dd><p>A buffer containing a block of image data. This might be a complete image or a subset.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">block_size</span></code></dt><dd><p>Size of <code class="docutils literal notranslate"><span class="pre">block</span></code>. The size must not be greater than <a class="reference internal" href="#c.PSA_FWU_MAX_BLOCK_SIZE" title="PSA_FWU_MAX_BLOCK_SIZE"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_FWU_MAX_BLOCK_SIZE</span></code></a>.</p>
+</dd>
+</dl>
+<p class="rubric">Returns: <a class="reference internal" href="#c.psa_status_t" title="psa_status_t"><code class="docutils literal notranslate"><span class="pre">psa_status_t</span></code></a></p>
+<dl>
+<dt> <a class="reference internal" href="#c.PSA_SUCCESS" title="PSA_SUCCESS"><code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code></a></dt><dd><p>The data in <code class="docutils literal notranslate"><span class="pre">block</span></code> has been successfully stored.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_INVALID_ARGUMENT" title="PSA_ERROR_INVALID_ARGUMENT"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_ARGUMENT</span></code></a></dt><dd><p>One of the following error conditions occured:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The parameter <code class="docutils literal notranslate"><span class="pre">size</span></code> is greater than <a class="reference internal" href="#c.PSA_FWU_MAX_BLOCK_SIZE" title="PSA_FWU_MAX_BLOCK_SIZE"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_FWU_MAX_BLOCK_SIZE</span></code></a>.</p></li>
+<li><p>The parameter <code class="docutils literal notranslate"><span class="pre">size</span></code> is 0.</p></li>
+<li><p>The combination of offset and size is out of bounds.</p></li>
+</ul>
+</div></blockquote>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_INSUFFICIENT_MEMORY" title="PSA_ERROR_INSUFFICIENT_MEMORY"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_MEMORY</span></code></a></dt><dd><p>There is not enough memory to process the update.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_INSUFFICIENT_STORAGE" title="PSA_ERROR_INSUFFICIENT_STORAGE"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_STORAGE</span></code></a></dt><dd><p>There is not enough storage to process the update.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_COMMUNICATION_FAILURE" title="PSA_ERROR_COMMUNICATION_FAILURE"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_COMMUNICATION_FAILURE</span></code></a></dt><dd><p>The system could not communicate with the installer.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_FLASH_ABUSE" title="PSA_ERROR_FLASH_ABUSE"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_FLASH_ABUSE</span></code></a></dt><dd><p>The system is defending against quick flash exhaustion and is in a time-out period.
+The time-out period is <a class="reference internal" href="../about.html#term-implementation-defined"><span class="scterm">implementation defined</span></a>.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_DATA_CORRUPT" title="PSA_ERROR_DATA_CORRUPT"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DATA_CORRUPT</span></code></a></dt><dd><p>Data corruption has been detected.
+For example, an implementation that uses stream signatures
+may be able to detect corruption early.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_INSUFFICIENT_POWER" title="PSA_ERROR_INSUFFICIENT_POWER"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_POWER</span></code></a></dt><dd><p>There is not enough power to complete the operation.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_GENERIC_ERROR" title="PSA_ERROR_GENERIC_ERROR"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_GENERIC_ERROR</span></code></a></dt><dd><p>A fatal error occured.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_CURRENTLY_INSTALLING" title="PSA_ERROR_CURRENTLY_INSTALLING"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_CURRENTLY_INSTALLING</span></code></a></dt><dd><p>The image is currently locked for writing. For example, <a class="reference internal" href="#c.psa_fwu_install" title="psa_fwu_install"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_install</span></code></a> is currently executing.</p>
+</dd>
+</dl>
+<p class="rubric">Description</p>
+<blockquote>
+<div></div></blockquote>
+<p>It is the caller’s responsibility to account for how much data is written at which offset.
+If no persistent storage is directly available for the caller to perform accounting, then the caller can use
+a different storage mechanism, such as the PSA Storage API.</p>
+</section>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>Open point</strong></p>
+<p>Should we provide a mechanism to read firmware? For example psa_fwu_read?</p>
+</div>
+<section id="psa_fwu_install">
+<span id="c.psa_fwu_install"></span><h2>7.8.4. <code class="docutils literal notranslate"><span class="pre">psa_fwu_install</span></code> (function)</h2>
+<p>Starts the installation of an image.</p>
+<p>The authenticity and integrity of the image is checked during installation.
+If a reboot is required to complete installation then the implementation can choose to defer the
+authenticity checks to that point.</p>
+<p>While this function executes, calls to <a class="reference internal" href="#c.psa_fwu_write" title="psa_fwu_write"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_write</span></code></a> with the
+image ID or a dependent image ID are rejected.</p>
+<p>If an image dependency is missing then an error is returned.</p>
+<p>Concurrent calls to this function with the same or dependent image IDs are not permitted and return an error.</p>
+<pre class="literal-block"><a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="#c.psa_fwu_install" title="psa_fwu_install">psa_fwu_install</a>(<a class="reference internal" href="#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> image_id,
+                             <a class="reference internal" href="#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> *dependency_image_id,
+                             <a class="reference internal" href="#c.psa_image_version_t" title="psa_image_version_t">psa_image_version_t</a> *dependency_version);</pre>
+<p class="rubric">Parameters</p>
+<dl class="simple">
+<dt> <code class="docutils literal notranslate"><span class="pre">image_id</span></code></dt><dd><p>The identifier of the image to install.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">dependency_image_id</span></code></dt><dd><p>If <a class="reference internal" href="#c.PSA_SUCCESS_DEPENDENCY_NEEDED" title="PSA_SUCCESS_DEPENDENCY_NEEDED"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_SUCCESS_DEPENDENCY_NEEDED</span></code></a> is returned, this parameter is filled
+with dependency information.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">dependency_version</span></code></dt><dd><p>If <a class="reference internal" href="#c.PSA_SUCCESS_DEPENDENCY_NEEDED" title="PSA_SUCCESS_DEPENDENCY_NEEDED"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_SUCCESS_DEPENDENCY_NEEDED</span></code></a> is returned, this parameter is filled
+with the minimum required version for the dependency.</p>
+</dd>
+</dl>
+<p class="rubric">Returns: <a class="reference internal" href="#c.psa_status_t" title="psa_status_t"><code class="docutils literal notranslate"><span class="pre">psa_status_t</span></code></a></p>
+<dl class="simple">
+<dt> <a class="reference internal" href="#c.PSA_SUCCESS" title="PSA_SUCCESS"><code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code></a></dt><dd><p>The image was successfully installed. The platform does not require a reboot.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_SUCCESS_REBOOT" title="PSA_SUCCESS_REBOOT"><code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS_REBOOT</span></code></a></dt><dd><p>A system reboot is needed to finish installation. Use <a class="reference internal" href="#c.psa_fwu_request_reboot" title="psa_fwu_request_reboot"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_request_reboot</span></code></a>.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_SUCCESS_RESTART" title="PSA_SUCCESS_RESTART"><code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS_RESTART</span></code></a></dt><dd><p>A restart of the updated component is required to complete the update.
+The restart mechanism is component specific.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_SUCCESS_DEPENDENCY_NEEDED" title="PSA_SUCCESS_DEPENDENCY_NEEDED"><code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS_DEPENDENCY_NEEDED</span></code></a></dt><dd><p>Another image needs to be installed to finish installation.
+The caller must begin the firmware update process with the image
+specified in <code class="docutils literal notranslate"><span class="pre">dependency</span></code>.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_INVALID_SIGNATURE" title="PSA_ERROR_INVALID_SIGNATURE"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_SIGNATURE</span></code></a></dt><dd><p>The signature is incorrect.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_NOT_PERMITTED" title="PSA_ERROR_NOT_PERMITTED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_PERMITTED</span></code></a></dt><dd><p>The image is too old to be installed.
+If the image metadata contains a timestamp, and it has expired,
+then this error is also returned.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_DATA_CORRUPT" title="PSA_ERROR_DATA_CORRUPT"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DATA_CORRUPT</span></code></a></dt><dd><p>The image is corrupt.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_INSUFFICIENT_DATA" title="PSA_ERROR_INSUFFICIENT_DATA"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_DATA</span></code></a></dt><dd><p>The image is smaller than expected.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_NOT_SUPPORTED" title="PSA_ERROR_NOT_SUPPORTED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_SUPPORTED</span></code></a></dt><dd><p>The image ID is either unknown or not supported.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_WRONG_DEVICE" title="PSA_ERROR_WRONG_DEVICE"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_WRONG_DEVICE</span></code></a></dt><dd><p>The image is not intended for this device instance. For example,
+the image</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_DEPENDENCY_NEEDED" title="PSA_ERROR_DEPENDENCY_NEEDED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DEPENDENCY_NEEDED</span></code></a></dt><dd><p>A different image requires installation first.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_STORAGE_FAILURE" title="PSA_ERROR_STORAGE_FAILURE"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_STORAGE_FAILURE</span></code></a></dt><dd><p>Some persistent storage could not be read or written by the implementation.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_MISSING_MANIFEST" title="PSA_ERROR_MISSING_MANIFEST"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_MISSING_MANIFEST</span></code></a></dt><dd><p>A manifest is needed for this image ID. It must be set using <a class="reference internal" href="#c.psa_fwu_set_manifest" title="psa_fwu_set_manifest"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_set_manifest</span></code></a>.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_DECRYPTION_FAILURE" title="PSA_ERROR_DECRYPTION_FAILURE"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DECRYPTION_FAILURE</span></code></a></dt><dd><p>The key used to decrypt the data is unknown or decryption failed.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_INSUFFICIENT_POWER" title="PSA_ERROR_INSUFFICIENT_POWER"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_POWER</span></code></a></dt><dd><p>There is not enough power to complete the operation.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_CURRENTLY_INSTALLING" title="PSA_ERROR_CURRENTLY_INSTALLING"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_CURRENTLY_INSTALLING</span></code></a></dt><dd><p>The implementation is busy installing the requested image ID.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_ALREADY_INSTALLED" title="PSA_ERROR_ALREADY_INSTALLED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_ALREADY_INSTALLED</span></code></a></dt><dd><p>The storage item associated with image ID has already been installed.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_INSTALL_INTERRUPTED" title="PSA_ERROR_INSTALL_INTERRUPTED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSTALL_INTERRUPTED</span></code></a></dt><dd><p>Installation was interrupted or aborted.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_GENERIC_ERROR" title="PSA_ERROR_GENERIC_ERROR"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_GENERIC_ERROR</span></code></a></dt><dd><p>A fatal error occured. This error is returned if not covered by other errors.</p>
+</dd>
+</dl>
+<p class="rubric">Description</p>
+</section>
+<section id="psa_fwu_abort">
+<span id="c.psa_fwu_abort"></span><h2>7.8.5. <code class="docutils literal notranslate"><span class="pre">psa_fwu_abort</span></code> (function)</h2>
+<p>Aborts an ongoing installation and erases the staging area of the image.</p>
+<pre class="literal-block"><a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="#c.psa_fwu_abort" title="psa_fwu_abort">psa_fwu_abort</a>(<a class="reference internal" href="#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> image_id);</pre>
+<p class="rubric">Parameters</p>
+<dl class="simple">
+<dt> <code class="docutils literal notranslate"><span class="pre">image_id</span></code></dt><dd><p>The identifier of the image to abort installation.</p>
+</dd>
+</dl>
+<p class="rubric">Returns: <a class="reference internal" href="#c.psa_status_t" title="psa_status_t"><code class="docutils literal notranslate"><span class="pre">psa_status_t</span></code></a></p>
+<dl class="simple">
+<dt> <a class="reference internal" href="#c.PSA_SUCCESS" title="PSA_SUCCESS"><code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code></a></dt><dd><p>Installation of the provided image ID has been aborted.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_INVALID_ARGUMENT" title="PSA_ERROR_INVALID_ARGUMENT"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_ARGUMENT</span></code></a></dt><dd><p>No image with the provided image ID is currently being installed.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_NOT_PERMITTED" title="PSA_ERROR_NOT_PERMITTED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_PERMITTED</span></code></a></dt><dd><p>The caller is not authorized to to abort an installation.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_STORAGE_FAILURE" title="PSA_ERROR_STORAGE_FAILURE"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_STORAGE_FAILURE</span></code></a></dt><dd><p>Some persistent storage could not be erased.</p>
+</dd>
+</dl>
+</section>
+<section id="psa_fwu_request_reboot">
+<span id="c.psa_fwu_request_reboot"></span><h2>7.8.6. <code class="docutils literal notranslate"><span class="pre">psa_fwu_request_reboot</span></code> (function)</h2>
+<p>Requests the platform to reboot. On success, the platform initiates a reboot,
+and might not return to the caller.</p>
+<pre class="literal-block"><a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="#c.psa_fwu_request_reboot" title="psa_fwu_request_reboot">psa_fwu_request_reboot</a>(void);</pre>
+<p class="rubric">Returns: <a class="reference internal" href="#c.psa_status_t" title="psa_status_t"><code class="docutils literal notranslate"><span class="pre">psa_status_t</span></code></a></p>
+<dl class="simple">
+<dt> <a class="reference internal" href="#c.PSA_SUCCESS" title="PSA_SUCCESS"><code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code></a></dt><dd><p>The platform will reboot soon.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_NOT_PERMITTED" title="PSA_ERROR_NOT_PERMITTED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_PERMITTED</span></code></a></dt><dd><p>The caller is not authorized to reboot the platform.</p>
+</dd>
+</dl>
+</section>
+<section id="psa_fwu_request_rollback">
+<span id="c.psa_fwu_request_rollback"></span><h2>7.8.7. <code class="docutils literal notranslate"><span class="pre">psa_fwu_request_rollback</span></code> (function)</h2>
+<p>Requests the platform to roll back the firmware belonging to the caller and any
+other image that is dependent on that firmware. This is only used
+when the caller detects a fatal error after an update.</p>
+<p>The platform may reject the request
+due to security policy.</p>
+<pre class="literal-block"><a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="#c.psa_fwu_request_rollback" title="psa_fwu_request_rollback">psa_fwu_request_rollback</a>(uint32_t error);</pre>
+<p class="rubric">Parameters</p>
+<dl class="simple">
+<dt> <code class="docutils literal notranslate"><span class="pre">error</span></code></dt><dd><p>An application-specific error code chosen by the application.
+If a specific error does not need to be reported, the value should be 0.
+On success, this error is recorded in the <code class="docutils literal notranslate"><span class="pre">error</span></code> field of the <a class="reference internal" href="#c.psa_image_info_t" title="psa_image_info_t"><code class="xref any c c-struct docutils literal notranslate"><span class="pre">psa_image_info_t</span></code></a> structure
+corresponding to this image.</p>
+</dd>
+</dl>
+<p class="rubric">Returns: <a class="reference internal" href="#c.psa_status_t" title="psa_status_t"><code class="docutils literal notranslate"><span class="pre">psa_status_t</span></code></a></p>
+<dl class="simple">
+<dt> <a class="reference internal" href="#c.PSA_SUCCESS" title="PSA_SUCCESS"><code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code></a></dt><dd><p>The current firmware, and dependent images, will be rolled back on reboot.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_DOES_NOT_EXIST" title="PSA_ERROR_DOES_NOT_EXIST"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DOES_NOT_EXIST</span></code></a></dt><dd><p>The image ID is not recognized.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_NOT_PERMITTED" title="PSA_ERROR_NOT_PERMITTED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_PERMITTED</span></code></a></dt><dd><p>Either the caller is not authorized to roll back the platform or the
+current image cannot be rolled back due to security policy.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_NOT_SUPPORTED" title="PSA_ERROR_NOT_SUPPORTED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_SUPPORTED</span></code></a></dt><dd><p>This call is not implemented or rollback support is not implemented.</p>
+</dd>
+</dl>
+<p class="rubric">Description</p>
+<p>On success, the current image becomes a rejected image, and the client will need to call
+<a class="reference internal" href="#c.psa_fwu_request_reboot" title="psa_fwu_request_reboot"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_request_reboot</span></code></a> to start the rollback process.</p>
+</section>
+<section id="psa_fwu_accept">
+<span id="c.psa_fwu_accept"></span><h2>7.8.8. <code class="docutils literal notranslate"><span class="pre">psa_fwu_accept</span></code> (function)</h2>
+<p>Indicates to the implementation that the upgrade was successful. This changes the image state
+of a firmware image, and its dependencies, from <a class="reference internal" href="#c.PSA_IMAGE_PENDING_INSTALL" title="PSA_IMAGE_PENDING_INSTALL"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_IMAGE_PENDING_INSTALL</span></code></a> to <a class="reference internal" href="#c.PSA_IMAGE_INSTALLED" title="PSA_IMAGE_INSTALLED"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_IMAGE_INSTALLED</span></code></a>.
+For more information about image states, see <a class="reference internal" href="../terminology.html#image-states"><span class="std std-ref">the definition</span></a>.</p>
+<pre class="literal-block"><a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="#c.psa_fwu_accept" title="psa_fwu_accept">psa_fwu_accept</a>(void);</pre>
+<p class="rubric">Returns: <a class="reference internal" href="#c.psa_status_t" title="psa_status_t"><code class="docutils literal notranslate"><span class="pre">psa_status_t</span></code></a></p>
+<dl class="simple">
+<dt> <a class="reference internal" href="#c.PSA_SUCCESS" title="PSA_SUCCESS"><code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code></a></dt><dd><p>The image and its dependencies have transitioned into a <a class="reference internal" href="#c.PSA_IMAGE_INSTALLED" title="PSA_IMAGE_INSTALLED"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_IMAGE_INSTALLED</span></code></a> state.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_DOES_NOT_EXIST" title="PSA_ERROR_DOES_NOT_EXIST"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DOES_NOT_EXIST</span></code></a></dt><dd><p>The image ID is not recognized.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_NOT_SUPPORTED" title="PSA_ERROR_NOT_SUPPORTED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_SUPPORTED</span></code></a></dt><dd><p>The image ID is recognized but is not supported in this implementation.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_NOT_PERMITTED" title="PSA_ERROR_NOT_PERMITTED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_PERMITTED</span></code></a></dt><dd><p>The caller is not permitted to make this call.</p>
+</dd>
+</dl>
+<p class="rubric">Description</p>
+<p>This function is optional and only required if an implementation supports a testing state.</p>
+<p>If the image is in a <a class="reference internal" href="#c.PSA_IMAGE_PENDING_INSTALL" title="PSA_IMAGE_PENDING_INSTALL"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_IMAGE_PENDING_INSTALL</span></code></a> state and this function is not called, then the image is replaced
+with an older image on reset.</p>
+</section>
+<section id="psa_fwu_get_image_id_iterator">
+<span id="c.psa_fwu_get_image_id_iterator"></span><h2>7.8.9. <code class="docutils literal notranslate"><span class="pre">psa_fwu_get_image_id_iterator</span></code> (function)</h2>
+<p>Gets an iterator for use with <a class="reference internal" href="#c.psa_fwu_get_image_id" title="psa_fwu_get_image_id"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_get_image_id</span></code></a>. An iterator always returns at least one image ID.</p>
+<pre class="literal-block">void <a class="reference internal" href="#c.psa_fwu_get_image_id_iterator" title="psa_fwu_get_image_id_iterator">psa_fwu_get_image_id_iterator</a>(<a class="reference internal" href="#c.psa_fwu_iterator_t" title="psa_fwu_iterator_t">psa_fwu_iterator_t</a> *iterator);</pre>
+<p class="rubric">Parameters</p>
+<dl class="simple">
+<dt> <code class="docutils literal notranslate"><span class="pre">iterator</span></code></dt><dd></dd>
+</dl>
+<p class="rubric">Returns: <code class="docutils literal notranslate"><span class="pre">void</span></code></p>
+</section>
+<section id="psa_fwu_get_image_id_next">
+<span id="c.psa_fwu_get_image_id_next"></span><h2>7.8.10. <code class="docutils literal notranslate"><span class="pre">psa_fwu_get_image_id_next</span></code> (function)</h2>
+<p>Advances an initialized iterator object. Used with  <a class="reference internal" href="#c.psa_fwu_get_image_id" title="psa_fwu_get_image_id"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_get_image_id</span></code></a>.</p>
+<pre class="literal-block">bool <a class="reference internal" href="#c.psa_fwu_get_image_id_next" title="psa_fwu_get_image_id_next">psa_fwu_get_image_id_next</a>(<a class="reference internal" href="#c.psa_fwu_iterator_t" title="psa_fwu_iterator_t">psa_fwu_iterator_t</a> *iterator);</pre>
+<p class="rubric">Parameters</p>
+<dl class="simple">
+<dt> <code class="docutils literal notranslate"><span class="pre">iterator</span></code></dt><dd><p>An initialized iterator object.</p>
+</dd>
+</dl>
+<p class="rubric">Returns: <code class="docutils literal notranslate"><span class="pre">bool</span></code></p>
+<dl class="simple">
+<dt> <code class="docutils literal notranslate"><span class="pre">0</span></code></dt><dd><p>Returns 0 if there are no more images to report.</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">1</span></code></dt><dd><p>Returns 1 if there are more images to report.</p>
+</dd>
+</dl>
+<p class="rubric">Description</p>
+</section>
+<section id="psa_fwu_get_image_id_valid">
+<span id="c.psa_fwu_get_image_id_valid"></span><h2>7.8.11. <code class="docutils literal notranslate"><span class="pre">psa_fwu_get_image_id_valid</span></code> (function)</h2>
+<p>Determines whether an iterator object is valid or not. Used with  <a class="reference internal" href="#c.psa_fwu_get_image_id" title="psa_fwu_get_image_id"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_get_image_id</span></code></a>.</p>
+<pre class="literal-block">bool <a class="reference internal" href="#c.psa_fwu_get_image_id_valid" title="psa_fwu_get_image_id_valid">psa_fwu_get_image_id_valid</a>(<a class="reference internal" href="#c.psa_fwu_iterator_t" title="psa_fwu_iterator_t">psa_fwu_iterator_t</a> *iterator);</pre>
+<p class="rubric">Parameters</p>
+<dl class="simple">
+<dt> <code class="docutils literal notranslate"><span class="pre">iterator</span></code></dt><dd><p>An initialized iterator object</p>
+</dd>
+</dl>
+<p class="rubric">Returns: <code class="docutils literal notranslate"><span class="pre">bool</span></code></p>
+<dl class="simple">
+<dt> <code class="docutils literal notranslate"><span class="pre">0</span></code></dt><dd><p>Returns 0 if the iterator is invalid</p>
+</dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">1</span></code></dt><dd><p>Returns 1 if the iterator is valid.</p>
+</dd>
+</dl>
+</section>
+<section id="psa_fwu_get_image_id">
+<span id="c.psa_fwu_get_image_id"></span><h2>7.8.12. <code class="docutils literal notranslate"><span class="pre">psa_fwu_get_image_id</span></code> (function)</h2>
+<p>Returns the image ID.</p>
+<pre class="literal-block"><a class="reference internal" href="#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="#c.psa_fwu_get_image_id" title="psa_fwu_get_image_id">psa_fwu_get_image_id</a>(<a class="reference internal" href="#c.psa_fwu_iterator_t" title="psa_fwu_iterator_t">psa_fwu_iterator_t</a> *iterator,
+                                  <a class="reference internal" href="#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> *image_id);</pre>
+<p class="rubric">Parameters</p>
+<dl class="simple">
+<dt> <code class="docutils literal notranslate"><span class="pre">iterator</span></code></dt><dd></dd>
+<dt> <code class="docutils literal notranslate"><span class="pre">image_id</span></code></dt><dd></dd>
+</dl>
+<p class="rubric">Returns: <a class="reference internal" href="#c.psa_status_t" title="psa_status_t"><code class="docutils literal notranslate"><span class="pre">psa_status_t</span></code></a></p>
+<dl class="simple">
+<dt> <a class="reference internal" href="#c.PSA_SUCCESS" title="PSA_SUCCESS"><code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code></a></dt><dd><p>Image information has been returned.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_INVALID_ARGUMENT" title="PSA_ERROR_INVALID_ARGUMENT"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_ARGUMENT</span></code></a></dt><dd><p>A parameter is not valid.</p>
+</dd>
+<dt> <a class="reference internal" href="#c.PSA_ERROR_NOT_PERMITTED" title="PSA_ERROR_NOT_PERMITTED"><code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_PERMITTED</span></code></a></dt><dd><p>The caller is not authorized to access platform version information.</p>
+</dd>
+</dl>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3><a href="../index.html"><b>FWU API</b></a></h3>
+IHI 0093<br/>
+Non-confidential<br/>
+Version 0.7.0-bet.0
+<span style="color: red; font-weight: bold;"></span>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About this document</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html#design-goals">2. Design goals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html">3. Terminology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html#trust-model-and-scenarios">4. Trust model and scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">5. Design overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../image-formats.html">6. Image metadata</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">7. API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">7.1. Library conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#behavior-on-error">7.2. Behavior on error</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pointer-conventions">7.3. Pointer conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#macros">7.4. Macros</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#library-versioning">7.4.1. Library versioning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#image-transfer">7.4.2. Image transfer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#digest-size">7.4.3. Digest size</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#image-states">7.4.4. Image states</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#image-flags">7.4.5. Image flags</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#types">7.5. Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#psa_image_version_t">7.5.1. <code class="docutils literal notranslate"><span class="pre">psa_image_version_t</span></code> (struct)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_staging_info_t">7.5.2. <code class="docutils literal notranslate"><span class="pre">psa_staging_info_t</span></code> (struct)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_image_info_t">7.5.3. <code class="docutils literal notranslate"><span class="pre">psa_image_info_t</span></code> (struct)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_uuid_t">7.5.4. <code class="docutils literal notranslate"><span class="pre">psa_uuid_t</span></code> (struct)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_image_id_t">7.5.5. <code class="docutils literal notranslate"><span class="pre">psa_image_id_t</span></code> (type)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_fwu_iterator_t">7.5.6. <code class="docutils literal notranslate"><span class="pre">psa_fwu_iterator_t</span></code> (type)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_hash_t">7.5.7. <code class="docutils literal notranslate"><span class="pre">psa_hash_t</span></code> (struct)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#status-codes">7.6. Status codes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#psa_status_t">7.6.1. <code class="docutils literal notranslate"><span class="pre">psa_status_t</span></code> (type)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_SUCCESS">7.6.2. <code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_SUCCESS_REBOOT">7.6.3. <code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS_REBOOT</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_SUCCESS_RESTART">7.6.4. <code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS_RESTART</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_SUCCESS_DEPENDENCY_NEEDED">7.6.5. <code class="docutils literal notranslate"><span class="pre">PSA_SUCCESS_DEPENDENCY_NEEDED</span></code> (macro)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-codes">7.7. Error codes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_GENERIC_ERROR">7.7.1. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_GENERIC_ERROR</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_NOT_SUPPORTED">7.7.2. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_SUPPORTED</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_NOT_PERMITTED">7.7.3. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_PERMITTED</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_DOES_NOT_EXIST">7.7.4. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DOES_NOT_EXIST</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_INVALID_ARGUMENT">7.7.5. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_ARGUMENT</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_INSUFFICIENT_MEMORY">7.7.6. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_MEMORY</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_INSUFFICIENT_STORAGE">7.7.7. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_STORAGE</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_COMMUNICATION_FAILURE">7.7.8. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_COMMUNICATION_FAILURE</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_STORAGE_FAILURE">7.7.9. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_STORAGE_FAILURE</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_DATA_CORRUPT">7.7.10. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DATA_CORRUPT</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_DATA_INVALID">7.7.11. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DATA_INVALID</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_HARDWARE_FAILURE">7.7.12. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_HARDWARE_FAILURE</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_CORRUPTION_DETECTED">7.7.13. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_CORRUPTION_DETECTED</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_INVALID_SIGNATURE">7.7.14. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INVALID_SIGNATURE</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_INSUFFICIENT_DATA">7.7.15. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_DATA</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_WRONG_DEVICE">7.7.16. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_WRONG_DEVICE</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_DEPENDENCY_NEEDED">7.7.17. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DEPENDENCY_NEEDED</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_CURRENTLY_INSTALLING">7.7.18. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_CURRENTLY_INSTALLING</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_ALREADY_INSTALLED">7.7.19. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_ALREADY_INSTALLED</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_INSTALL_INTERRUPTED">7.7.20. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSTALL_INTERRUPTED</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_FLASH_ABUSE">7.7.21. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_FLASH_ABUSE</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_INSUFFICIENT_POWER">7.7.22. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_INSUFFICIENT_POWER</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_DECRYPTION_FAILURE">7.7.23. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_DECRYPTION_FAILURE</span></code> (macro)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#PSA_ERROR_MISSING_MANIFEST">7.7.24. <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_MISSING_MANIFEST</span></code> (macro)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">7.8. Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#psa_fwu_query">7.8.1. <code class="docutils literal notranslate"><span class="pre">psa_fwu_query</span></code> (function)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_fwu_set_manifest">7.8.2. <code class="docutils literal notranslate"><span class="pre">psa_fwu_set_manifest</span></code> (function)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_fwu_write">7.8.3. <code class="docutils literal notranslate"><span class="pre">psa_fwu_write</span></code> (function)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_fwu_install">7.8.4. <code class="docutils literal notranslate"><span class="pre">psa_fwu_install</span></code> (function)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_fwu_abort">7.8.5. <code class="docutils literal notranslate"><span class="pre">psa_fwu_abort</span></code> (function)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_fwu_request_reboot">7.8.6. <code class="docutils literal notranslate"><span class="pre">psa_fwu_request_reboot</span></code> (function)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_fwu_request_rollback">7.8.7. <code class="docutils literal notranslate"><span class="pre">psa_fwu_request_rollback</span></code> (function)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_fwu_accept">7.8.8. <code class="docutils literal notranslate"><span class="pre">psa_fwu_accept</span></code> (function)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_fwu_get_image_id_iterator">7.8.9. <code class="docutils literal notranslate"><span class="pre">psa_fwu_get_image_id_iterator</span></code> (function)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_fwu_get_image_id_next">7.8.10. <code class="docutils literal notranslate"><span class="pre">psa_fwu_get_image_id_next</span></code> (function)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_fwu_get_image_id_valid">7.8.11. <code class="docutils literal notranslate"><span class="pre">psa_fwu_get_image_id_valid</span></code> (function)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#psa_fwu_get_image_id">7.8.12. <code class="docutils literal notranslate"><span class="pre">psa_fwu_get_image_id</span></code> (function)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/example-header.html">Example header file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/examples.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/future-changes.html">Future changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/change-history.html">Change history</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; 2020-2021, Arm Limited or its affiliates. All rights reserved.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

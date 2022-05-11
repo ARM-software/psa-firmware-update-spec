@@ -1,0 +1,222 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>5. Design overview &#8212; FWU API 0.7.0-bet.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="6. Image metadata" href="image-formats.html" />
+    <link rel="prev" title="3. Terminology" href="terminology.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="design-overview">
+<h1>5. Design overview</h1>
+<p id="overview">The document <span><em>A Firmware Update Architecture for Internet of Things</em> <a class="reference internal" href="about.html#citation-suit-arch"><span class="cite">[SUIT-ARCH]</span></a></span> describes an example
+flow and the expected device side actions:</p>
+<ul class="simple">
+<li><p>Query image information</p></li>
+<li><p>Validate image metadata</p></li>
+<li><p>Store image</p></li>
+<li><p>Verify image</p></li>
+<li><p>Trigger reboot</p></li>
+</ul>
+<p>The design of the interface offers functions for these actions.
+The interface contains three major classes of error codes: storage errors, security errors, and
+dependency errors. The caller must be prepared to handle these.</p>
+<p>The interface is expected to be provided by an implementation that runs in the <a class="reference internal" href="about.html#term-nspe"><span class="term">NSPE</span></a>.
+However, it may be necessary to protect certain functions using the SPE on some platforms.</p>
+<section id="mandatory-functions">
+<h2>5.1. Mandatory functions</h2>
+<p>The interface supports these actions using the following calls.</p>
+<section id="querying-installed-images">
+<h3>5.1.1. Querying installed images</h3>
+<p>The caller calls <a class="reference internal" href="api/update.html#c.psa_fwu_query" title="psa_fwu_query"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_query</span></code></a> to fetch information about
+firmware images on the device. This includes state for installed images, rejected images, and candidate images.
+This information is expected to be passed to a remote operator or status tracker.
+A local <a class="reference internal" href="about.html#term-update-client"><span class="term">Update client</span></a> may also use this information to make a local decision.
+For example, the data may be used to avoid fetching images unnecessarily if they
+are already on the device.</p>
+<p>To satisfy <a class="reference internal" href="intro.html#id1"><span class="std std-ref">Section 2.1</span></a>,
+the query function uses an iterator to minimize memory footprint.
+The caller may relay this information to a remote
+status tracker. Eventually, new firmware is downloaded to the device by the caller.</p>
+<p>Each image has its own local identifier that represents the type of image.
+This is known as an image ID. Queries are based on an image ID.</p>
+<p>The image ID of each updatable image can be discovered using the provided
+iterator functions. The query function returns global identification information
+about the image, such as the associated Vendor ID, Class ID, and the hash
+of the public signing key.</p>
+</section>
+<section id="image-storing">
+<h3>5.1.2. Image storing</h3>
+<p>Each image has its own image ID that represents the type of image.
+Each image has its own staging area. The image ID is used by the implementation
+to determine the appropriate staging area.</p>
+<p>The caller uses <a class="reference internal" href="api/update.html#c.psa_fwu_write" title="psa_fwu_write"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_write</span></code></a> to write a candidate image to its staging area.
+To satisfy Section 2.1 the caller can use this operation to write an image
+incrementally in blocks. On a rich device with plenty of memory, the caller uses this as a single-part function.
+A number of errors can be detected and returned by this call, and can depend on the qualities of the implementation.</p>
+<p>A staging area can be erased using <a class="reference internal" href="api/update.html#c.psa_fwu_abort" title="psa_fwu_abort"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_abort</span></code></a>.</p>
+</section>
+<section id="metadata-storage">
+<h3>5.1.3. Metadata storage</h3>
+<p>If the image does not embed metadata, then a standalone metadata object can be associated with the same image
+by calling <a class="reference internal" href="api/update.html#c.psa_fwu_set_manifest" title="psa_fwu_set_manifest"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_set_manifest</span></code></a> with the same image ID.</p>
+</section>
+<section id="verify-image">
+<h3>5.1.4. Verify image</h3>
+<p>The caller finishes the firmware update process with <a class="reference internal" href="api/update.html#c.psa_fwu_install" title="psa_fwu_install"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_install</span></code></a>.</p>
+<p>On success, the implementation checks any necessary preconditions and prepares installation.</p>
+<p>On some implementations, this will starts an integrity check on the firmware image based on the metadata.
+On other implementations, the validation of the metadata is deferred to the bootloader when the platform next resets.</p>
+<p>The implementation indicates whether a reboot is required to complete installation by using a return value.</p>
+<p>The implementation indicates whether a dependency is missing by using a set of output parameters.</p>
+<p>If a dependency is missing, the dependency is specified in two output parameters, the image ID of the missing image and the required version.
+The caller then fetches the required image and repeats the process.</p>
+</section>
+<section id="triggering-a-reboot">
+<h3>5.1.5. Triggering a reboot</h3>
+<p>If a reboot is required to complete the firmware update process then the caller uses <a class="reference internal" href="api/update.html#c.psa_fwu_request_reboot" title="psa_fwu_request_reboot"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_request_reboot</span></code></a> to restart the platform. The
+caller chooses when is an appropriate time to reboot the platform.</p>
+</section>
+</section>
+<section id="optional-functions">
+<h2>5.2. Optional functions</h2>
+<p>The following image management functions must be implemented if a PENDING_INSTALL state is supported:</p>
+<ul class="simple">
+<li><p>A function, <a class="reference internal" href="api/update.html#c.psa_fwu_request_rollback" title="psa_fwu_request_rollback"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_request_rollback</span></code></a>, is provided for <a class="reference internal" href="about.html#term-application-firmware"><span class="term">application firmware</span></a> to request
+the device to roll back
+the recently applied updates. This is for scenarios where the newly updated firmware detects a fatal
+problem with the update. The implementation may deny this request if this is prevented
+by security policy (e.g. rollback protection). An implementation can also choose not
+to support this.</p></li>
+<li><p>A function, <a class="reference internal" href="api/update.html#c.psa_fwu_accept" title="psa_fwu_accept"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_accept</span></code></a>, is provided for <a class="reference internal" href="about.html#term-application-firmware"><span class="term">application firmware</span></a> to indicate whether the recently
+applied updates are working correctly. This is for scenarios where the newly installed firmware must be tested
+before it is permanently installed. An example of a test is a built in self-test.</p></li>
+</ul>
+</section>
+<section id="state-transitions-for-an-image">
+<h2>5.3. State transitions for an image</h2>
+<p>The permitted state transitions are shown in the following diagram:</p>
+<figure class="align-default" id="id1">
+<img alt="Permitted state transitions for an image" src="_images/permitted-state-transitions.pdf" />
+<figcaption>
+<p><span class="caption-number">Figure 1 </span><span class="caption-text">Permitted state transitions for an image using the API.</span></p>
+</figcaption>
+</figure>
+<p>Every firmware update image begins in the CANDIDATE state.
+All successful firmware update images reach the INSTALLED state.</p>
+<p>The state of an image can be queried using <a class="reference internal" href="api/update.html#c.psa_fwu_query" title="psa_fwu_query"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_query</span></code></a>.</p>
+</section>
+<section id="dependencies">
+<h2>5.4. Dependencies</h2>
+<p>An image can have a dependency on another image. When an image has a dependency it
+cannot be installed until all of its dependencies are satisfied. This means that
+all images must be written prior to calling <a class="reference internal" href="api/update.html#c.psa_fwu_install" title="psa_fwu_install"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_install</span></code></a>. Dependencies are
+described within image metadata.</p>
+<p>If a dependency is not explicit then the implementation is not guaranteed to detect
+compatibility issues. For instance, if an installation contains two images, A and B,
+and A depends on B, then the system will not be able to detect incompatibilities if
+B is upgraded in isolation. If mutual dependency is required, then A should specify
+a dependency on B and B should specify a dependency on A.</p>
+<p>A dependency consists of an image ID and version.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3><a href="index.html"><b>FWU API</b></a></h3>
+IHI 0093<br/>
+Non-confidential<br/>
+Version 0.7.0-bet.0
+<span style="color: red; font-weight: bold;"></span>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About this document</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html#design-goals">2. Design goals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">3. Terminology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html#trust-model-and-scenarios">4. Trust model and scenarios</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">5. Design overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#mandatory-functions">5.1. Mandatory functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#querying-installed-images">5.1.1. Querying installed images</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#image-storing">5.1.2. Image storing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#metadata-storage">5.1.3. Metadata storage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#verify-image">5.1.4. Verify image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#triggering-a-reboot">5.1.5. Triggering a reboot</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#optional-functions">5.2. Optional functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#state-transitions-for-an-image">5.3. State transitions for an image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dependencies">5.4. Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="image-formats.html">6. Image metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">7. API reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="appendix/example-header.html">Example header file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/examples.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/future-changes.html">Future changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/change-history.html">Change history</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; 2020-2021, Arm Limited or its affiliates. All rights reserved.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

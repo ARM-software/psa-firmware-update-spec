@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Change history &#8212; FWU API 0.7.0-bet.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Future changes" href="future-changes.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="change-history">
+<h1>Change history</h1>
+<p id="id1">This section describes detailed changes between past versions.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../api/update.html#c.PSA_FWU_API_VERSION_MINOR" title="PSA_FWU_API_VERSION_MINOR"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_FWU_API_VERSION_MINOR</span></code></a> has increased from 6 to 7</p></li>
+<li><p><a class="reference internal" href="../api/update.html#c.psa_image_id_t" title="psa_image_id_t"><code class="xref any c c-type docutils literal notranslate"><span class="pre">psa_image_id_t</span></code></a> is now defined as a 32-bit integer. Functions
+no longer have a pointer type for this parameter.</p></li>
+<li><p>UUID concept dropped from function names and parameters.</p></li>
+<li><p>Added Vendor ID and Class ID to <a class="reference internal" href="../api/update.html#c.psa_image_info_t" title="psa_image_info_t"><code class="xref any c c-struct docutils literal notranslate"><span class="pre">psa_image_info_t</span></code></a> structure.</p></li>
+<li><p>Added Future changes section</p></li>
+<li><p>Added error code and success code definitions</p></li>
+<li><p>Fixed mistake: <a class="reference internal" href="../api/update.html#c.psa_fwu_abort" title="psa_fwu_abort"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_abort</span></code></a> return type changed from void to <a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t"><code class="xref any c c-type docutils literal notranslate"><span class="pre">psa_status_t</span></code></a></p></li>
+<li><p>Clarifications to the text</p></li>
+<li><p>Replaced <code class="docutils literal notranslate"><span class="pre">PSA_ERROR_ROLLBACK_DETECTED</span></code> with <a class="reference internal" href="../api/update.html#c.PSA_ERROR_NOT_PERMITTED" title="PSA_ERROR_NOT_PERMITTED"><code class="xref any c c-macro docutils literal notranslate"><span class="pre">PSA_ERROR_NOT_PERMITTED</span></code></a></p></li>
+<li><p>Remove standardized image IDs until we get more feedback</p></li>
+<li><p>Improvements to the Design Overview text</p></li>
+</ul>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3><a href="../index.html"><b>FWU API</b></a></h3>
+IHI 0093<br/>
+Non-confidential<br/>
+Version 0.7.0-bet.0
+<span style="color: red; font-weight: bold;"></span>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About this document</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html#design-goals">2. Design goals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html">3. Terminology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html#trust-model-and-scenarios">4. Trust model and scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">5. Design overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../image-formats.html">6. Image metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">7. API reference</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="example-header.html">Example header file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="future-changes.html">Future changes</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Change history</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; 2020-2021, Arm Limited or its affiliates. All rights reserved.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

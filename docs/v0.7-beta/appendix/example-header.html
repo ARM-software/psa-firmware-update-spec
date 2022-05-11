@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Example header file &#8212; FWU API 0.7.0-bet.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Example usage" href="examples.html" />
+    <link rel="prev" title="7.1. Library conventions" href="../api/update.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="example-header-file">
+<span id="appendix-example-header"></span><h1>Example header file</h1>
+<p>Each implementation of the PSA Firmware Update API must provide a header file named <code class="file docutils literal notranslate"><span class="pre">psa/update.h</span></code>, in which the API elements in this specification are defined.</p>
+<p>This appendix provides a example of the <code class="file docutils literal notranslate"><span class="pre">psa/update.h</span></code> header file with all of the API elements. This can be used as a starting point or reference for an implementation.</p>
+<section id="psa-update-h">
+<h2>psa/update.h</h2>
+<pre class="literal-block">typedef <em>/*...*/</em> <a class="reference internal" href="../api/update.html#c.psa_fwu_iterator_t" title="psa_fwu_iterator_t">psa_fwu_iterator_t</a>;
+typedef uint32_t <a class="reference internal" href="../api/update.html#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a>;
+typedef int32_t <a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>;
+struct <a class="reference internal" href="../api/update.html#c.psa_hash_t" title="psa_hash_t">psa_hash_t</a> {
+    uint8_t value[<a class="reference internal" href="../api/update.html#c.PSA_FWU_MAX_DIGEST_SIZE" title="PSA_FWU_MAX_DIGEST_SIZE">PSA_FWU_MAX_DIGEST_SIZE</a>];
+};
+typedef struct <a class="reference internal" href="../api/update.html#c.psa_image_info_t" title="psa_image_info_t">psa_image_info_t</a> {
+    struct <a class="reference internal" href="../api/update.html#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> image_id;
+    <a class="reference internal" href="../api/update.html#c.psa_uuid_t" title="psa_uuid_t">psa_uuid_t</a> vendor_id;
+    <a class="reference internal" href="../api/update.html#c.psa_uuid_t" title="psa_uuid_t">psa_uuid_t</a> class_id;
+    struct <a class="reference internal" href="../api/update.html#c.psa_image_version_t" title="psa_image_version_t">psa_image_version_t</a> version;
+    uint8_t state;
+    <a class="reference internal" href="../api/update.html#c.psa_staging_info_t" title="psa_staging_info_t">psa_staging_info_t</a> staging;
+    uint32_t error;
+    uint8_t digest[<a class="reference internal" href="../api/update.html#c.PSA_FWU_MAX_DIGEST_SIZE" title="PSA_FWU_MAX_DIGEST_SIZE">PSA_FWU_MAX_DIGEST_SIZE</a>];
+} <a class="reference internal" href="../api/update.html#c.psa_image_info_t" title="psa_image_info_t">psa_image_info_t</a>;
+typedef struct <a class="reference internal" href="../api/update.html#c.psa_image_version_t" title="psa_image_version_t">psa_image_version_t</a> {
+    uint16_t major;
+    uint16_t minor;
+    uint16_t patch;
+} <a class="reference internal" href="../api/update.html#c.psa_image_version_t" title="psa_image_version_t">psa_image_version_t</a>;
+typedef struct <a class="reference internal" href="../api/update.html#c.psa_staging_info_t" title="psa_staging_info_t">psa_staging_info_t</a> {
+    uint8_t flags;
+    uint8_t metadata_format;
+    size_t max_size;
+    <a class="reference internal" href="../api/update.html#c.psa_hash_t" title="psa_hash_t">psa_hash_t</a> key_id;
+} <a class="reference internal" href="../api/update.html#c.psa_staging_info_t" title="psa_staging_info_t">psa_staging_info_t</a>;
+typedef struct <a class="reference internal" href="../api/update.html#c.psa_uuid_t" title="psa_uuid_t">psa_uuid_t</a> {
+    uint32_t uuid[4];
+} <a class="reference internal" href="../api/update.html#c.psa_uuid_t" title="psa_uuid_t">psa_uuid_t</a>;
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_ALREADY_INSTALLED" title="PSA_ERROR_ALREADY_INSTALLED">PSA_ERROR_ALREADY_INSTALLED</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-158)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_COMMUNICATION_FAILURE" title="PSA_ERROR_COMMUNICATION_FAILURE">PSA_ERROR_COMMUNICATION_FAILURE</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-145)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_CORRUPTION_DETECTED" title="PSA_ERROR_CORRUPTION_DETECTED">PSA_ERROR_CORRUPTION_DETECTED</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-151)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_CURRENTLY_INSTALLING" title="PSA_ERROR_CURRENTLY_INSTALLING">PSA_ERROR_CURRENTLY_INSTALLING</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-157)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_DATA_CORRUPT" title="PSA_ERROR_DATA_CORRUPT">PSA_ERROR_DATA_CORRUPT</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-152)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_DATA_INVALID" title="PSA_ERROR_DATA_INVALID">PSA_ERROR_DATA_INVALID</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-153)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_DECRYPTION_FAILURE" title="PSA_ERROR_DECRYPTION_FAILURE">PSA_ERROR_DECRYPTION_FAILURE</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-162)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_DEPENDENCY_NEEDED" title="PSA_ERROR_DEPENDENCY_NEEDED">PSA_ERROR_DEPENDENCY_NEEDED</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-156)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_DOES_NOT_EXIST" title="PSA_ERROR_DOES_NOT_EXIST">PSA_ERROR_DOES_NOT_EXIST</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-140)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_FLASH_ABUSE" title="PSA_ERROR_FLASH_ABUSE">PSA_ERROR_FLASH_ABUSE</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-160)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_GENERIC_ERROR" title="PSA_ERROR_GENERIC_ERROR">PSA_ERROR_GENERIC_ERROR</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-132)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_HARDWARE_FAILURE" title="PSA_ERROR_HARDWARE_FAILURE">PSA_ERROR_HARDWARE_FAILURE</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-147)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_INSTALL_INTERRUPTED" title="PSA_ERROR_INSTALL_INTERRUPTED">PSA_ERROR_INSTALL_INTERRUPTED</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-159)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_INSUFFICIENT_DATA" title="PSA_ERROR_INSUFFICIENT_DATA">PSA_ERROR_INSUFFICIENT_DATA</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-143)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_INSUFFICIENT_MEMORY" title="PSA_ERROR_INSUFFICIENT_MEMORY">PSA_ERROR_INSUFFICIENT_MEMORY</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-141)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_INSUFFICIENT_POWER" title="PSA_ERROR_INSUFFICIENT_POWER">PSA_ERROR_INSUFFICIENT_POWER</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-161)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_INSUFFICIENT_STORAGE" title="PSA_ERROR_INSUFFICIENT_STORAGE">PSA_ERROR_INSUFFICIENT_STORAGE</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-142)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_INVALID_ARGUMENT" title="PSA_ERROR_INVALID_ARGUMENT">PSA_ERROR_INVALID_ARGUMENT</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-135)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_INVALID_SIGNATURE" title="PSA_ERROR_INVALID_SIGNATURE">PSA_ERROR_INVALID_SIGNATURE</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-149)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_MISSING_MANIFEST" title="PSA_ERROR_MISSING_MANIFEST">PSA_ERROR_MISSING_MANIFEST</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-163)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_NOT_PERMITTED" title="PSA_ERROR_NOT_PERMITTED">PSA_ERROR_NOT_PERMITTED</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-133)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_NOT_SUPPORTED" title="PSA_ERROR_NOT_SUPPORTED">PSA_ERROR_NOT_SUPPORTED</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-134)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_STORAGE_FAILURE" title="PSA_ERROR_STORAGE_FAILURE">PSA_ERROR_STORAGE_FAILURE</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-146)
+#define <a class="reference internal" href="../api/update.html#c.PSA_ERROR_WRONG_DEVICE" title="PSA_ERROR_WRONG_DEVICE">PSA_ERROR_WRONG_DEVICE</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)-155)
+#define <a class="reference internal" href="../api/update.html#c.PSA_FWU_API_VERSION_MAJOR" title="PSA_FWU_API_VERSION_MAJOR">PSA_FWU_API_VERSION_MAJOR</a> 0
+#define <a class="reference internal" href="../api/update.html#c.PSA_FWU_API_VERSION_MINOR" title="PSA_FWU_API_VERSION_MINOR">PSA_FWU_API_VERSION_MINOR</a> 7
+#define <a class="reference internal" href="../api/update.html#c.PSA_FWU_MAX_BLOCK_SIZE" title="PSA_FWU_MAX_BLOCK_SIZE">PSA_FWU_MAX_BLOCK_SIZE</a> IMPDEF
+#define <a class="reference internal" href="../api/update.html#c.PSA_FWU_MAX_DIGEST_SIZE" title="PSA_FWU_MAX_DIGEST_SIZE">PSA_FWU_MAX_DIGEST_SIZE</a> IMPDEF
+#define <a class="reference internal" href="../api/update.html#c.PSA_IMAGE_CANDIDATE" title="PSA_IMAGE_CANDIDATE">PSA_IMAGE_CANDIDATE</a> 1
+#define <a class="reference internal" href="../api/update.html#c.PSA_IMAGE_FLAG_ENCRYPTION" title="PSA_IMAGE_FLAG_ENCRYPTION">PSA_IMAGE_FLAG_ENCRYPTION</a> (0x00000002)
+#define <a class="reference internal" href="../api/update.html#c.PSA_IMAGE_FLAG_VOLATILE_STAGING" title="PSA_IMAGE_FLAG_VOLATILE_STAGING">PSA_IMAGE_FLAG_VOLATILE_STAGING</a> (0x00000001)
+#define <a class="reference internal" href="../api/update.html#c.PSA_IMAGE_INSTALLED" title="PSA_IMAGE_INSTALLED">PSA_IMAGE_INSTALLED</a> 2
+#define <a class="reference internal" href="../api/update.html#c.PSA_IMAGE_PENDING_INSTALL" title="PSA_IMAGE_PENDING_INSTALL">PSA_IMAGE_PENDING_INSTALL</a> 4
+#define <a class="reference internal" href="../api/update.html#c.PSA_IMAGE_REBOOT_NEEDED" title="PSA_IMAGE_REBOOT_NEEDED">PSA_IMAGE_REBOOT_NEEDED</a> 5
+#define <a class="reference internal" href="../api/update.html#c.PSA_IMAGE_REJECTED" title="PSA_IMAGE_REJECTED">PSA_IMAGE_REJECTED</a> 3
+#define <a class="reference internal" href="../api/update.html#c.PSA_IMAGE_UNDEFINED" title="PSA_IMAGE_UNDEFINED">PSA_IMAGE_UNDEFINED</a> 0
+#define <a class="reference internal" href="../api/update.html#c.PSA_SUCCESS" title="PSA_SUCCESS">PSA_SUCCESS</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)0)
+#define <a class="reference internal" href="../api/update.html#c.PSA_SUCCESS_DEPENDENCY_NEEDED" title="PSA_SUCCESS_DEPENDENCY_NEEDED">PSA_SUCCESS_DEPENDENCY_NEEDED</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)+3)
+#define <a class="reference internal" href="../api/update.html#c.PSA_SUCCESS_REBOOT" title="PSA_SUCCESS_REBOOT">PSA_SUCCESS_REBOOT</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)+1)
+#define <a class="reference internal" href="../api/update.html#c.PSA_SUCCESS_RESTART" title="PSA_SUCCESS_RESTART">PSA_SUCCESS_RESTART</a> ((<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a>)+2)
+<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="../api/update.html#c.psa_fwu_abort" title="psa_fwu_abort">psa_fwu_abort</a>(<a class="reference internal" href="../api/update.html#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> image_id);
+<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="../api/update.html#c.psa_fwu_accept" title="psa_fwu_accept">psa_fwu_accept</a>(void);
+<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="../api/update.html#c.psa_fwu_get_image_id" title="psa_fwu_get_image_id">psa_fwu_get_image_id</a>(<a class="reference internal" href="../api/update.html#c.psa_fwu_iterator_t" title="psa_fwu_iterator_t">psa_fwu_iterator_t</a> *iterator,
+                                  <a class="reference internal" href="../api/update.html#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> *image_id);
+void <a class="reference internal" href="../api/update.html#c.psa_fwu_get_image_id_iterator" title="psa_fwu_get_image_id_iterator">psa_fwu_get_image_id_iterator</a>(<a class="reference internal" href="../api/update.html#c.psa_fwu_iterator_t" title="psa_fwu_iterator_t">psa_fwu_iterator_t</a> *iterator);
+bool <a class="reference internal" href="../api/update.html#c.psa_fwu_get_image_id_next" title="psa_fwu_get_image_id_next">psa_fwu_get_image_id_next</a>(<a class="reference internal" href="../api/update.html#c.psa_fwu_iterator_t" title="psa_fwu_iterator_t">psa_fwu_iterator_t</a> *iterator);
+bool <a class="reference internal" href="../api/update.html#c.psa_fwu_get_image_id_valid" title="psa_fwu_get_image_id_valid">psa_fwu_get_image_id_valid</a>(<a class="reference internal" href="../api/update.html#c.psa_fwu_iterator_t" title="psa_fwu_iterator_t">psa_fwu_iterator_t</a> *iterator);
+<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="../api/update.html#c.psa_fwu_install" title="psa_fwu_install">psa_fwu_install</a>(<a class="reference internal" href="../api/update.html#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> image_id,
+                             <a class="reference internal" href="../api/update.html#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> *dependency_image_id,
+                             <a class="reference internal" href="../api/update.html#c.psa_image_version_t" title="psa_image_version_t">psa_image_version_t</a> *dependency_version);
+<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="../api/update.html#c.psa_fwu_query" title="psa_fwu_query">psa_fwu_query</a>(<a class="reference internal" href="../api/update.html#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> image_id,
+                           <a class="reference internal" href="../api/update.html#c.psa_image_info_t" title="psa_image_info_t">psa_image_info_t</a> *info);
+<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="../api/update.html#c.psa_fwu_request_reboot" title="psa_fwu_request_reboot">psa_fwu_request_reboot</a>(void);
+<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="../api/update.html#c.psa_fwu_request_rollback" title="psa_fwu_request_rollback">psa_fwu_request_rollback</a>(uint32_t error);
+<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="../api/update.html#c.psa_fwu_set_manifest" title="psa_fwu_set_manifest">psa_fwu_set_manifest</a>(<a class="reference internal" href="../api/update.html#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> image_id,
+                                  const void *manifest,
+                                  size_t manifest_size,
+                                  <a class="reference internal" href="../api/update.html#c.psa_hash_t" title="psa_hash_t">psa_hash_t</a> *manifest_dependency);
+<a class="reference internal" href="../api/update.html#c.psa_status_t" title="psa_status_t">psa_status_t</a> <a class="reference internal" href="../api/update.html#c.psa_fwu_write" title="psa_fwu_write">psa_fwu_write</a>(<a class="reference internal" href="../api/update.html#c.psa_image_id_t" title="psa_image_id_t">psa_image_id_t</a> image_id,
+                           size_t image_offset,
+                           const void *block,
+                           size_t block_size);
+</pre>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3><a href="../index.html"><b>FWU API</b></a></h3>
+IHI 0093<br/>
+Non-confidential<br/>
+Version 0.7.0-bet.0
+<span style="color: red; font-weight: bold;"></span>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../about.html">About this document</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html#design-goals">2. Design goals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html">3. Terminology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../terminology.html#trust-model-and-scenarios">4. Trust model and scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../design.html">5. Design overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../image-formats.html">6. Image metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">7. API reference</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Example header file</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#psa-update-h">psa/update.h</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="future-changes.html">Future changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="change-history.html">Change history</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; 2020-2021, Arm Limited or its affiliates. All rights reserved.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

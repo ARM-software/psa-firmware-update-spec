@@ -1,0 +1,390 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>About this document &#8212; FWU API 0.7.0-bet.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="author" title="About these documents" href="#" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="1. Introduction" href="intro.html" />
+    <link rel="prev" title="PSA Firmware Update API 0.7" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="about-this-document">
+<span id="id1"></span><h1>About this document</h1>
+<section id="release-information">
+<h2>Release information</h2>
+<p>The change history table lists the changes that have been made to this document.</p>
+<table class="colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 15%" />
+<col style="width: 20%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Date</p></th>
+<th class="head"><p>Version</p></th>
+<th class="head"><p>Confidentiality</p></th>
+<th class="head"><p>Change</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Feb 2021</p></td>
+<td><p>0.7 Beta 0</p></td>
+<td><p>Non-confidential</p></td>
+<td><p>First release at Beta quality.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<p><span class="sectiontitle">PSA Firmware Update API</span></p>
+<p>Copyright © 2020-2021, Arm Limited or its affiliates. All rights reserved. The copyright statement reflects the fact that some
+draft issues of this document have been released, to a limited circulation.</p>
+<section id="arm-non-confidential-document-licence-licence">
+<h2>Arm Non-Confidential Document Licence (“Licence”)</h2>
+<div class="license docutils container">
+<p>This Licence is a legal agreement between you and Arm Limited (“<strong>Arm</strong>”) for the use of Arm’s intellectual property (including, without limitation, any copyright) embodied in the document accompanying this Licence (“<strong>Document</strong>”). Arm licenses its intellectual property in the Document to you on condition that you agree to the terms of this Licence. By using or copying the Document you indicate that you agree to be bound by the terms of this Licence.</p>
+<p>“<strong>Subsidiary</strong>” means any company the majority of whose voting shares is now or hereafter owner or controlled, directly or indirectly, by you. A company shall be a Subsidiary only for the period during which such control exists.</p>
+<p>This Document is <strong>NON-CONFIDENTIAL</strong> and any use by you and your Subsidiaries (“Licensee”) is subject to the terms of this Licence between you and Arm.</p>
+<p>Subject to the terms and conditions of this Licence, Arm hereby grants to Licensee under the intellectual property in the Document owned or controlled by Arm, a non-exclusive, non-transferable, non-sub-licensable, royalty-free, worldwide licence to:</p>
+<ol class="lowerroman simple">
+<li><p>use and copy the Document for the purpose of designing and having designed products that comply with the Document;</p></li>
+<li><p>manufacture and have manufactured products which have been created under the licence granted in (i) above; and</p></li>
+<li><p>sell, supply and distribute products which have been created under the licence granted in (i) above.</p></li>
+</ol>
+<p><strong>Licensee hereby agrees that the licences granted above shall not extend to any portion or function of a product that is not itself compliant with part of the Document.</strong></p>
+<p>Except as expressly licensed above, Licensee acquires no right, title or interest in any Arm technology or any intellectual property embodied therein.</p>
+<p>THE DOCUMENT IS PROVIDED “AS IS”. ARM PROVIDES NO REPRESENTATIONS AND NO WARRANTIES, EXPRESS, IMPLIED OR STATUTORY, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY, SATISFACTORY QUALITY, NON-INFRINGEMENT OR FITNESS FOR A PARTICULAR PURPOSE WITH RESPECT TO THE DOCUMENT. Arm may make changes to the Document at any time and without notice. For the avoidance of doubt, Arm makes no representation with respect to, and has undertaken no analysis to identify or understand the scope and content of, third party patents, copyrights, trade secrets, or other rights.</p>
+<p>NOTWITHSTANDING ANYTHING TO THE CONTRARY CONTAINED IN THIS LICENCE, TO THE FULLEST EXTENT PERMITTED BY LAW, IN NO EVENT WILL ARM BE LIABLE FOR ANY DAMAGES, IN CONTRACT, TORT OR OTHERWISE, IN CONNECTION WITH THE SUBJECT MATTER OF THIS LICENCE (INCLUDING WITHOUT LIMITATION) (I) LICENSEE’S USE OF THE DOCUMENT; AND (II) THE IMPLEMENTATION OF THE DOCUMENT IN ANY PRODUCT CREATED BY LICENSEE UNDER THIS LICENCE). THE EXISTENCE OF MORE THAN ONE CLAIM OR SUIT WILL NOT ENLARGE OR EXTEND THE LIMIT. LICENSEE RELEASES ARM FROM ALL OBLIGATIONS, LIABILITY, CLAIMS OR DEMANDS IN EXCESS OF THIS LIMITATION.</p>
+<p>This Licence shall remain in force until terminated by Licensee or by Arm. Without prejudice to any of its other rights, if Licensee is in breach of any of the terms and conditions of this Licence then Arm may terminate this Licence immediately upon giving written notice to Licensee. Licensee may terminate this Licence at any time. Upon termination of this Licence by Licensee or by Arm, Licensee shall stop using the Document and destroy all copies of the Document in its possession. Upon termination of this Licence, all terms shall survive except for the licence grants.</p>
+<p>Any breach of this Licence by a Subsidiary shall entitle Arm to terminate this Licence as if you were the party in breach. Any termination of this Licence shall be effective in respect of all Subsidiaries. Any rights granted to any Subsidiary hereunder shall automatically terminate upon such Subsidiary ceasing to be a Subsidiary.</p>
+<p>The Document consists solely of commercial items. Licensee shall be responsible for ensuring that any use, duplication or disclosure of the Document complies fully with any relevant export laws and regulations to assure that the Document or any portion thereof is not exported, directly or indirectly, in violation of such export laws.</p>
+<p>This Licence may be translated into other languages for convenience, and Licensee agrees that if there is any conflict between the English version of this Licence and any translation, the terms of the English version of this Licence shall prevail.</p>
+<p>The Arm corporate logo and words marked with ® or ™ are registered trademarks or trademarks of Arm Limited (or its subsidiaries) in the US and/or elsewhere. All rights reserved.  Other brands and names mentioned in this document may be the trademarks of their respective owners. No licence, express, implied or otherwise, is granted to Licensee under this Licence, to use the Arm trade marks in connection with the Document or any products based thereon. Visit Arm’s website at <a class="reference external" href="https://www.arm.com/company/policies/trademarks">https://www.arm.com/company/policies/trademarks</a> for more information about Arm’s trademarks.</p>
+<p>The validity, construction and performance of this Licence shall be governed by English Law.</p>
+<p>Copyright © 2020-2021, Arm Limited or its affiliates. All rights reserved.</p>
+<div class="line-block">
+<div class="line">Arm Limited. Company 02557590 registered in England.</div>
+<div class="line">110 Fulbourn Road, Cambridge, England CB1 9NJ.</div>
+</div>
+<p>Arm document reference: LES-PRE-21585 version 4.0</p>
+</div>
+</section>
+<section id="references">
+<h2>References</h2>
+<p>This document refers to the following documents.</p>
+<table class="longtable colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 20%" />
+<col style="width: 65%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Ref</p></th>
+<th class="head"><p>Document Number</p></th>
+<th class="head"><p>Title</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><span class="target" id="citation-psa-sm"></span>[PSA-SM]</p></td>
+<td><p>DEN 0079</p></td>
+<td><p><em>PSA Security Model</em>. <a class="reference external" href="https://pages.arm.com/psa-resources-sm.html">https://pages.arm.com/psa-resources-sm.html</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="target" id="citation-psa-tb"></span>[PSA-TB]</p></td>
+<td><p>DEN 0072</p></td>
+<td><p><em>PSA Trusted Boot and Firmware Update</em>. <a class="reference external" href="https://pages.arm.com/psa-resources-tbfu.html">https://pages.arm.com/psa-resources-tbfu.html</a></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="target" id="citation-psa-att"></span>[PSA-ATT]</p></td>
+<td><p>IHI 0085</p></td>
+<td><p><em>PSA Attestation API</em>. <a class="reference external" href="https://pages.arm.com/psa-apis.html">https://pages.arm.com/psa-apis.html</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="target" id="citation-psa-dbg"></span>[PSA-DBG]</p></td>
+<td><p>PSA-DBG-AUTH</p></td>
+<td><p><em>PSA Debug Access Control</em>. </p></td>
+</tr>
+<tr class="row-even"><td><p><span class="target" id="citation-psa-cert"></span>[PSA-CERT]</p></td>
+<td><p>JSA DEN 002</p></td>
+<td><p><em>PSA Certified™ Level 2 Lightweight Protection Profile</em>. <a class="reference external" href="https://www.psacertified.org/resources/">https://www.psacertified.org/resources/</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="target" id="citation-suit"></span>[SUIT]</p></td>
+<td></td>
+<td><p>IETF, <em>A Concise Binary Object Representation (CBOR)-based Serialization
+Format for the Software Updates for Internet of Things (SUIT) Manifest</em>. <a class="reference external" href="https://tools.ietf.org/html/draft-ietf-suit-manifest-04">https://tools.ietf.org/html/draft-ietf-suit-manifest-04</a></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="target" id="citation-suit-arch"></span>[SUIT-ARCH]</p></td>
+<td></td>
+<td><p>IETF, <em>A Firmware Update Architecture for Internet of Things</em>. <a class="reference external" href="https://tools.ietf.org/html/draft-ietf-suit-architecture-08#page-22">https://tools.ietf.org/html/draft-ietf-suit-architecture-08#page-22</a></p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="target" id="citation-rfc4122"></span>[RFC4122]</p></td>
+<td></td>
+<td><p>IETF, <em>A Universally Unique IDentifier (UUID) URN Namespace</em>. <a class="reference external" href="https://tools.ietf.org/html/rfc4122">https://tools.ietf.org/html/rfc4122</a></p></td>
+</tr>
+<tr class="row-even"><td><p><span class="target" id="citation-ebbr"></span>[EBBR]</p></td>
+<td><p>ARM DEN 0064</p></td>
+<td><p>ARM, <em>Embedded Base Boot Requirements</em>. </p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="target" id="citation-suit-code"></span>[SUIT-CODE]</p></td>
+<td></td>
+<td><p>GitHub, <em>Example code to generate and parse SUIT manifests</em>. <a class="reference external" href="https://github.com/ARMmbed/suit-manifest-generator">https://github.com/ARMmbed/suit-manifest-generator</a></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="terms-and-abbreviations">
+<h2>Terms and abbreviations</h2>
+<p>This document uses the following terms and abbreviations.</p>
+<table class="longtable colwidths-given docutils align-default">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Term</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><span><span class="target" id="term-application-firmware"></span><span>Application firmware</span></span></td>
+<td><p>The main application firmware for the platform, typically comprising an Operating System (OS) and application tasks.
+On a platform with isolation, the application firmware runs in the <a class="reference internal" href="#term-nspe"><span class="term">NSPE</span></a>.</p></td>
+</tr>
+<tr class="row-odd"><td><span><span class="target" id="term-application-root-of-trust"></span><span>Application Root of Trust</span></span></td>
+<td><p>This is the security domain in which additional security services are implemented. See <span><em>PSA Security Model</em> <a class="reference internal" href="#citation-psa-sm"><span class="cite">[PSA-SM]</span></a></span> for details.</p></td>
+</tr>
+<tr class="row-even"><td><span><span class="target" id="term-cbor"></span><span>CBOR</span></span></td>
+<td><p>Concise Binary Object Representation (CBOR). A binary data serialization format loosely based on JSON.</p></td>
+</tr>
+<tr class="row-odd"><td><span><span class="target" id="term-cloud-connector"></span><span>Cloud connector</span></span></td>
+<td><p>See <a class="reference internal" href="#term-update-client"><span class="term">Update client</span></a>.</p></td>
+</tr>
+<tr class="row-even"><td><span><span class="target" id="term-csp"></span><span>CSP</span></span></td>
+<td><p>Cloud service provider</p></td>
+</tr>
+<tr class="row-odd"><td><span><span class="target" id="term-implementation-defined"></span><span class="sc">Implementation Defined</span></span></td>
+<td><p>Behavior that is not defined by the this specification, but is defined and documented by individual implementations.</p>
+<p>Firmware developers can choose to depend on <span class="sc">IMPLEMENTATION DEFINED</span> behavior, but must be aware that their code might not be portable to another implementation.</p>
+</td>
+</tr>
+<tr class="row-even"><td><span><span class="target" id="term-isv"></span><span>ISV</span></span></td>
+<td><p>Independent software vendor</p></td>
+</tr>
+<tr class="row-odd"><td><span><span class="target" id="term-manifest"></span><span>Manifest</span></span></td>
+<td><p>Image metadata that is signed with a cryptographic key.</p></td>
+</tr>
+<tr class="row-even"><td><span><span class="target" id="term-mpu"></span><span>MPU</span></span></td>
+<td><p>Memory Protection Unit</p></td>
+</tr>
+<tr class="row-odd"><td><span><span class="target" id="term-non-secure-processing-environment"></span><span>Non-secure Processing Environment (NSPE)</span></span></td>
+<td><p>This is the security domain outside of the <a class="reference internal" href="#term-secure-processing-environment"><span class="term">Secure Processing Environment</span></a>.
+It is the Application domain, typically containing the <a class="reference internal" href="#term-application-firmware"><span class="term">application firmware</span></a> and hardware.</p></td>
+</tr>
+<tr class="row-even"><td><span><span class="target" id="term-nspe"></span><span><span>NSPE</span></span></span></td>
+<td><span>See <a class="reference internal" href="#term-non-secure-processing-environment"><span class="term">Non-secure Processing Environment</span></a>.</span></td>
+</tr>
+<tr class="row-odd"><td><span><span class="target" id="term-oem"></span><span>OEM</span></span></td>
+<td><p>Original Equipment Manufacturer</p></td>
+</tr>
+<tr class="row-even"><td><span><span class="target" id="term-ota"></span><span><span>OTA</span></span></span></td>
+<td><span>See <a class="reference internal" href="#term-over-the-air"><span class="term">Over-the-Air</span></a>.</span></td>
+</tr>
+<tr class="row-odd"><td><span><span class="target" id="term-over-the-air"></span><span>Over-the-Air (OTA)</span></span></td>
+<td><p>The procedure where a device downloads an update from a remote location (“over the air”).</p></td>
+</tr>
+<tr class="row-even"><td><span><span class="target" id="term-programmer-error"></span><span class="sc">Programmer error</span></span></td>
+<td><p>An error that is caused by the misuse of a programming interface.</p>
+<p>A <span class="sc">PROGRAMMER ERROR</span> is in the caller of the interface, but it is detected by the implementer of the interface.</p>
+</td>
+</tr>
+<tr class="row-odd"><td><span><span class="target" id="term-psa"></span><span>PSA</span></span></td>
+<td><p>Platform Security Architecture</p></td>
+</tr>
+<tr class="row-even"><td><span><span class="target" id="term-psa-immutable-root-of-trust"></span><span>PSA Immutable Root of Trust</span></span></td>
+<td><p>The hardware, code and data that cannot be modified following manufacturing. See <span><em>PSA Security Model</em> <a class="reference internal" href="#citation-psa-sm"><span class="cite">[PSA-SM]</span></a></span> for details.</p></td>
+</tr>
+<tr class="row-odd"><td><span><span class="target" id="term-psa-root-of-trust"></span><span>PSA Root of Trust</span></span></td>
+<td><p>This defines the most trusted security domain within a PSA system. See <span><em>PSA Security Model</em> <a class="reference internal" href="#citation-psa-sm"><span class="cite">[PSA-SM]</span></a></span> for details.</p></td>
+</tr>
+<tr class="row-even"><td><span><span class="target" id="term-psa-updateable-root-of-trust"></span><span>PSA Updateable Root of Trust</span></span></td>
+<td><p>The <a class="reference internal" href="#term-root-of-trust"><span class="term">Root of Trust</span></a> firmware that can be updated following manufacturing. See <span><em>PSA Security Model</em> <a class="reference internal" href="#citation-psa-sm"><span class="cite">[PSA-SM]</span></a></span> for details.</p></td>
+</tr>
+<tr class="row-odd"><td><span><span class="target" id="term-root-of-trust"></span><span>Root of Trust (RoT)</span></span></td>
+<td><p>This is the minimal set of software, hardware and data that is implicitly trusted in the platform — there is no software or hardware at a deeper level that can verify that the Root of Trust is authentic and unmodified. See <span><em>PSA Security Model</em> <a class="reference internal" href="#citation-psa-sm"><span class="cite">[PSA-SM]</span></a></span>.</p></td>
+</tr>
+<tr class="row-even"><td><span><span class="target" id="term-rot"></span><span><span>RoT</span></span></span></td>
+<td><span>See <a class="reference internal" href="#term-root-of-trust"><span class="term">Root of Trust</span></a>.</span></td>
+</tr>
+<tr class="row-odd"><td><span><span class="target" id="term-secure-partition"></span><span>Secure Partition</span></span></td>
+<td><p>A thread of execution with protected runtime state within the <a class="reference internal" href="#term-secure-processing-environment"><span class="term">Secure Processing Environment</span></a>. Container for the implementation of one or more <a class="reference internal" href="#term-rot"><span class="term">RoT</span></a> services. Multiple Secure Partitions may exist on a platform.</p></td>
+</tr>
+<tr class="row-even"><td><span><span class="target" id="term-secure-partition-manager"></span><span>Secure Partition Manager (SPM)</span></span></td>
+<td><p>Part of the PSA Firmware Framework that is responsible for isolating software in Partitions, managing the execution of software within Partitions, and providing IPC between Partitions.</p></td>
+</tr>
+<tr class="row-odd"><td><span><span class="target" id="term-secure-processing-environment"></span><span>Secure Processing Environment (SPE)</span></span></td>
+<td><p>This is the security domain that includes the <a class="reference internal" href="#term-psa-root-of-trust"><span class="term">PSA Root of Trust</span></a> and the <a class="reference internal" href="#term-application-root-of-trust"><span class="term">Application Root of Trust</span></a> domains.</p></td>
+</tr>
+<tr class="row-even"><td><span><span class="target" id="term-spe"></span><span><span>SPE</span></span></span></td>
+<td><span>See <a class="reference internal" href="#term-secure-processing-environment"><span class="term">Secure Processing Environment</span></a>.</span></td>
+</tr>
+<tr class="row-odd"><td><span><span class="target" id="term-spm"></span><span><span>SPM</span></span></span></td>
+<td><span>See <a class="reference internal" href="#term-secure-partition-manager"><span class="term">Secure Partition Manager</span></a>.</span></td>
+</tr>
+<tr class="row-even"><td><span><span class="target" id="term-trusted-boot"></span><span>Trusted Boot</span></span></td>
+<td><p>Trusted Boot is technology to provide a chain of trust for all the components during boot. See <span><em>PSA Trusted Boot and Firmware Update</em> <a class="reference internal" href="#citation-psa-tb"><span class="cite">[PSA-TB]</span></a></span>.</p></td>
+</tr>
+<tr class="row-odd"><td><span><span class="target" id="term-update-client"></span><span>Update client</span></span></td>
+<td><p>Software component that is responsible for downloading firmware updates to the device.
+The Update client is part of the <a class="reference internal" href="#term-application-firmware"><span class="term">application firmware</span></a>.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="conventions">
+<h2>Conventions</h2>
+<section id="typographical-conventions">
+<h3>Typographical conventions</h3>
+<p>The typographical conventions are:</p>
+<dl>
+<dt><em>italic</em></dt><dd><p>Introduces special terminology, and denotes citations.</p>
+</dd>
+<dt><code class="docutils literal notranslate"><span class="pre">monospace</span></code></dt><dd><p>Used for assembler syntax descriptions, pseudocode, and source code examples.</p>
+<p>Also used in the main text for instruction mnemonics and for references to
+other items appearing in assembler syntax descriptions, pseudocode, and
+source code examples.</p>
+</dd>
+<dt><span class="sc">small capitals</span></dt><dd><p>Used for some common terms such as <span class="sc">implementation defined</span>.</p>
+<p>Used for a few terms that have specific technical meanings, and are included
+in the <em>Terms and abbreviations</em>.</p>
+</dd>
+<dt><span class="issue">Red text</span></dt><dd><p>Indicates an open issue.</p>
+</dd>
+<dt><span class="anchor">Blue text</span></dt><dd><p>Indicates a link. This can be</p>
+<ul class="simple">
+<li><p>A cross-reference to another location within the document</p></li>
+<li><p>A URL, for example <a class="reference external" href="http://infocenter.arm.com">http://infocenter.arm.com</a></p></li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="numbers">
+<h3>Numbers</h3>
+<p>Numbers are normally written in decimal. Binary numbers are preceded by 0b, and
+hexadecimal numbers by <code class="docutils literal notranslate"><span class="pre">0x</span></code>.</p>
+<p>In both cases, the prefix and the associated value are written in a monospace
+font, for example <code class="docutils literal notranslate"><span class="pre">0xFFFF0000</span></code>. To improve readability, long numbers can be
+written with an underscore separator between every four characters, for example
+<code class="docutils literal notranslate"><span class="pre">0xFFFF_0000_0000_0000</span></code>. Ignore any underscores when interpreting the value of
+a number.</p>
+</section>
+</section>
+<section id="feedback">
+<h2>Feedback</h2>
+<p>Arm welcomes feedback on its documentation.</p>
+<section id="feedback-on-this-book">
+<h3>Feedback on this book</h3>
+<p>If you have comments on the content of this book, send an e-mail to
+<a class="reference external" href="mailto:arm&#46;psa-feedback&#37;&#52;&#48;arm&#46;com">arm<span>&#46;</span>psa-feedback<span>&#64;</span>arm<span>&#46;</span>com</a>. Give:</p>
+<ul class="simple">
+<li><p>The title (PSA Firmware Update API).</p></li>
+<li><p>The number and issue (IHI 0093 0.7 Beta (Issue 0)).</p></li>
+<li><p>The page numbers to which your comments apply.</p></li>
+<li><p>The rule identifiers to which your comments apply, if applicable.</p></li>
+<li><p>A concise explanation of your comments.</p></li>
+</ul>
+<p>Arm also welcomes general suggestions for additions and improvements.</p>
+</section>
+</section>
+<p>A description of the open issues is described in appendix <a class="reference internal" href="appendix/future-changes.html#futurechanges"><span class="std std-ref">Future changes</span></a>.</p>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3><a href="index.html"><b>FWU API</b></a></h3>
+IHI 0093<br/>
+Non-confidential<br/>
+Version 0.7.0-bet.0
+<span style="color: red; font-weight: bold;"></span>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">About this document</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#release-information">Release information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#arm-non-confidential-document-licence-licence">Arm Non-Confidential Document Licence (“Licence”)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#terms-and-abbreviations">Terms and abbreviations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conventions">Conventions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#feedback">Feedback</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html#design-goals">2. Design goals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">3. Terminology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html#trust-model-and-scenarios">4. Trust model and scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">5. Design overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image-formats.html">6. Image metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">7. API reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="appendix/example-header.html">Example header file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/examples.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/future-changes.html">Future changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/change-history.html">Change history</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; 2020-2021, Arm Limited or its affiliates. All rights reserved.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

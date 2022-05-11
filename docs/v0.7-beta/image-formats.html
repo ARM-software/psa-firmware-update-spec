@@ -1,0 +1,267 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>6. Image metadata &#8212; FWU API 0.7.0-bet.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="7. API reference" href="api/index.html" />
+    <link rel="prev" title="5. Design overview" href="design.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="image-metadata">
+<h1>6. Image metadata</h1>
+<p id="metadata">This section describes the format options, usage models, and a metadata example.</p>
+<section id="format-profiles">
+<h2>6.1. Format profiles</h2>
+<p>The choice of metadata format depends on the software development practices
+and interoperability requirements of a particular deployment.</p>
+<p>At least one of the following formats must be supported by the interface:</p>
+<table class="colwidths-given longtable docutils align-right" id="id1">
+<caption><span class="caption-number">Table 1 </span><span class="caption-text">Supported formats per segment</span></caption>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 22%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Profile ID</p></th>
+<th class="head"><p>Profile name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">0x1</span></code></p></td>
+<td><p>IETF SUIT CBOR</p></td>
+<td><p>The full specification for the format is described in <span><em>A Concise Binary Object Representation (CBOR)-based Serialization
+Format for the Software Updates for Internet of Things (SUIT) Manifest</em> <a class="reference internal" href="about.html#citation-suit"><span class="cite">[SUIT]</span></a></span>.
+The manifest contains an authentication header
+that is signed using CBOR Object Signing and Encryption (COSE).
+An example is provided in the following sections.
+Arm recommends this profile.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">0x2</span></code></p></td>
+<td><p>Implementation specified</p></td>
+<td><p>A proprietary implementation. A description of the format should be made publicly available.
+This option is not preferable because it provides no interoperability.</p></td>
+</tr>
+</tbody>
+</table>
+<p>It is expected that implementations are built to only support a single profile.
+However, an implementation can choose to support multiple profiles if necessary.</p>
+<p>All Profile IDs not specified here are reserved for future use.</p>
+</section>
+<section id="usage-models">
+<h2>6.2. Usage models</h2>
+<p>The metadata can be supplied using one of two methods, depending on the protocol used:</p>
+<ul class="simple">
+<li><p><strong>Embedded method</strong>: The metadata is prepended to each image.</p></li>
+<li><p><strong>Standalone method</strong>: The metadata is standalone and separate from images. The metadata
+can describe metadata for multiple images. In this case, <a class="reference internal" href="api/update.html#c.psa_fwu_set_manifest" title="psa_fwu_set_manifest"><code class="xref any c c-func docutils literal notranslate"><span class="pre">psa_fwu_set_manifest</span></code></a> is used.</p></li>
+</ul>
+<p>The decision is made by the caller depending on the firmware update protocol.</p>
+</section>
+<section id="example-metadata">
+<h2>6.3. Example metadata</h2>
+<p>The manifest format described contains many optional and extensible fields covering the
+goals of this specification.</p>
+<p>The following example shows an example of a single image specified as a SUIT CBOR manifest.
+Further examples are provided in <a class="reference external" href="https://tools.ietf.org/html/draft-ietf-suit-manifest-04#page-67">at this link</a>.</p>
+<section id="summary">
+<h3>6.3.1. Summary</h3>
+<p>The example manifest contains two major subparts:</p>
+<blockquote>
+<div><ul>
+<li><p>Manifest authentication header. The authentication header authenticates the manifest data.
+It includes the following fields:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Signature information (<code class="docutils literal notranslate"><span class="pre">alg</span></code> and <code class="docutils literal notranslate"><span class="pre">payload</span></code>).</p></li>
+<li><p>The raw signature (<code class="docutils literal notranslate"><span class="pre">signature</span></code>).</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>Manifest content. It includes the following fields:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Manifest format version (<code class="docutils literal notranslate"><span class="pre">manifest-version</span></code>).</p></li>
+<li><p>Manifest Sequence number (<code class="docutils literal notranslate"><span class="pre">manifest-sequence-number</span></code>).</p></li>
+<li><p>Class UUID and Vendor UUID (<code class="docutils literal notranslate"><span class="pre">class-id</span></code> and <code class="docutils literal notranslate"><span class="pre">vendor-id</span></code>).</p></li>
+<li><p>Image digest information (e.g. <code class="docutils literal notranslate"><span class="pre">image-size</span></code>, <code class="docutils literal notranslate"><span class="pre">algorithm-id</span></code>, <code class="docutils literal notranslate"><span class="pre">digest-bytes</span></code>)</p></li>
+<li><p>Installation instructions (in this example there is only the <code class="docutils literal notranslate"><span class="pre">condition-image-match</span></code> and <code class="docutils literal notranslate"><span class="pre">directive-run</span></code> directive)</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<div class="admonition-implementation-note admonition">
+<p class="admonition-title">Implementation note:</p>
+<p>An example open-source tool for generating SUIT manifests is available at :<span><em>Example code to generate and parse SUIT manifests</em> <a class="reference internal" href="about.html#citation-suit-code"><span class="cite">[SUIT-CODE]</span></a></span>.
+The project also contains a small parser that can be included in small microcontrollers.</p>
+</div>
+</section>
+<section id="cbor">
+<h3>6.3.2. CBOR</h3>
+<p>The example manifest below conforms to IETF SUIT and is written in CBOR diagnostic language for illustrative purposes.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>{
+    / authentication-wrapper / 2:h&#39;81d28443a10126a058248202582064d8094
+da3ef71c5971b7b84e7f4be1f56452c32fdde7bc1c70889112f1d5d9958407d637397e
+12abdd41bc026a8e8a22f0f902a5b972e7786d570a37ac43c370b64a6946b0311f059c
+a01d40f74d88d6fd7193baa36f5cf20aa57c46a0411a6b704&#39; / [
+        18([
+                / protected / h&#39;a10126&#39; / {
+                    / alg / 1:-7 / ES256 /,
+                } /,
+                / unprotected / {
+                },
+                / payload / h&#39;8202582064d8094da3ef71c5971b7b84e7f4be1f
+56452c32fdde7bc1c70889112f1d5d99&#39; / [
+                    / algorithm-id / 2 / sha256 /,
+                    / digest-bytes /
+h&#39;64d8094da3ef71c5971b7b84e7f4be1f56452c32fdde7bc1c70889112f1d5d99&#39;
+                ] /,
+                / signature / h&#39;7d637397e12abdd41bc026a8e8a22f0f902a5b
+972e7786d570a37ac43c370b64a6946b0311f059ca01d40f74d88d6fd7193baa36f5cf
+20aa57c46a0411a6b704&#39;
+            ])
+    ] /,
+    / manifest / 3:h&#39;a50101020103585ea20244818141000458548614a40150fa6
+b4a53d5ad5fdfbe9de663e4d41ffe02501492af1425695e48bf429b2d51f2ab4503820
+2582000112233445566778899aabbccddeeff0123456789abcdeffedcba98765432100
+e1987d001f602f60a438203f60c438217f6&#39; / {
+        / manifest-version / 1:1,
+        / manifest-sequence-number / 2:1,
+        / common / 3:h&#39;a20244818141000458548614a40150fa6b4a53d5ad5fdfb
+e9de663e4d41ffe02501492af1425695e48bf429b2d51f2ab450382025820001122334
+45566778899aabbccddeeff0123456789abcdeffedcba98765432100e1987d001f602f
+6&#39; / {
+            / components / 2:h&#39;81814100&#39; / [
+                [h&#39;00&#39;]
+            ] /,
+            / common-sequence / 4:h&#39;8614a40150fa6b4a53d5ad5fdfbe9de663
+e4d41ffe02501492af1425695e48bf429b2d51f2ab4503820258200011223344556677
+8899aabbccddeeff0123456789abcdeffedcba98765432100e1987d001f602f6&#39; / [
+                / directive-override-parameters / 20,{
+                    / vendor-id /
+1:h&#39;fa6b4a53d5ad5fdfbe9de663e4d41ffe&#39; / fa6b4a53-d5ad-5fdf-be9d-e663e4d41ffe /,
+                    / class-id / 2:h&#39;1492af1425695e48bf429b2d51f2ab45&#39;
+/ 1492af14-2569-5e48-bf42-9b2d51f2ab45 /,
+                        / image-digest / 3:[
+                        / algorithm-id / 2 / sha256 /,
+                        / digest-bytes /
+h&#39;00112233445566778899aabbccddeeff0123456789abcdeffedcba9876543210&#39;
+                    ],
+                    / image-size / 14:34768,
+                } ,
+                / condition-vendor-identifier / 1,F6 / nil / ,
+                / condition-class-identifier / 2,F6 / nil /
+            ] /,
+        } /,
+        / validate / 10:h&#39;8203f6&#39; / [
+            / condition-image-match / 3,F6 / nil /
+        ] /,
+        / run / 12:h&#39;8217f6&#39; / [
+            / directive-run / 23,F6 / nil /
+        ] /,
+    } /,
+}
+</pre></div>
+</div>
+<p>The total size of this example with COSE authentication object is estimated to be 231 bytes.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3><a href="index.html"><b>FWU API</b></a></h3>
+IHI 0093<br/>
+Non-confidential<br/>
+Version 0.7.0-bet.0
+<span style="color: red; font-weight: bold;"></span>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About this document</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html#design-goals">2. Design goals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">3. Terminology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html#trust-model-and-scenarios">4. Trust model and scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">5. Design overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">6. Image metadata</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#format-profiles">6.1. Format profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage-models">6.2. Usage models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-metadata">6.3. Example metadata</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#summary">6.3.1. Summary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cbor">6.3.2. CBOR</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">7. API reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="appendix/example-header.html">Example header file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/examples.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/future-changes.html">Future changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/change-history.html">Change history</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; 2020-2021, Arm Limited or its affiliates. All rights reserved.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

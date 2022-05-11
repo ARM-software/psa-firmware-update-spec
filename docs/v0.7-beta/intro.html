@@ -1,0 +1,283 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>1. Introduction &#8212; FWU API 0.7.0-bet.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="3. Terminology" href="terminology.html" />
+    <link rel="prev" title="About this document" href="about.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="introduction">
+<h1>1. Introduction</h1>
+<p>Firmware update support is an essential property of a PSA device.
+However, the mechanism to update firmware on a device differs
+significantly across embedded platforms.
+This is further complicated
+by different implementations of a Secure Processing Environment (SPE),
+which have their own set of firmware that is separate from application firmware.</p>
+<p>Some vendors also support a range of different
+Update clients that may come from third parties, such as ISVs, OEMs or CSPs,
+in order to support different markets. Likewise, CSPs must integrate
+their Update clients to work with different device vendor SDKs.
+The sum of these aspects create a significant integration
+and maintenance challenge, where there are <em>N</em> device SDKs
+that needs to integrate with <em>M</em> Update clients.</p>
+<p>This document describes a standard interface for updating
+firmware.
+By providing a consistent interface for firmware update, update clients
+and cloud connectors can be written in a more platform independent manner.
+The scope of the interface is primarily SPE firmware, but can be extended
+by implementers to cover non-SPE firmware.</p>
+<p>The document includes:</p>
+<ul class="simple">
+<li><p>A <a class="reference internal" href="#id1"><span class="std std-ref">rationale</span></a> for the design</p></li>
+<li><p><a class="reference internal" href="terminology.html"><span class="doc">Terminology</span></a></p></li>
+<li><p>The supported <a class="reference internal" href="terminology.html#trust-models"><span class="std std-ref">trust models</span></a></p></li>
+<li><p>A high level <a class="reference internal" href="design.html#overview"><span class="std std-ref">overview</span></a> of the functionality</p></li>
+<li><p>A detailed definition of the <a class="reference internal" href="api/update.html#api"><span class="std std-ref">API</span></a></p></li>
+<li><p>A <a class="reference internal" href="image-formats.html#metadata"><span class="std std-ref">metadata format</span></a></p></li>
+</ul>
+</section>
+<section id="design-goals">
+<h1>2. Design goals</h1>
+<p id="id1">This section describes the main goals of the interface and the rationale.</p>
+<section id="suitable-for-constrained-devices">
+<h2>2.1. Suitable for constrained devices</h2>
+<p id="my-reference-label"><span id="goal-constrained"></span>The interface is suitable for a range of embedded devices: from
+very simple microcontrollers with one or two flat images, to richer
+devices that have images for multiple subsystems and separated applications.</p>
+<p>Consequentially, the interface is scalable and modular:</p>
+<ul class="simple">
+<li><p><em>Scalable</em>: devices only need to implement the functionality that they will use.</p></li>
+<li><p><em>Modular</em>: larger devices can implement more aspects of the same interface,
+rather than different interfaces.</p></li>
+</ul>
+<p>A device is assumed to have enough storage for downloading updates over-the-air
+(OTA).
+The device is also assumed
+to have a backup or recovery capability in the event of a
+failed update. An implementation without such a capability may
+still choose to implement this interface.</p>
+<p>This document does not cover manual reprogramming of a device using a debug interface, such
+as JTAG or SWD. For more
+information, see <span><em>PSA Debug Access Control</em> <a class="reference internal" href="about.html#citation-psa-dbg"><span class="cite">[PSA-DBG]</span></a></span>.</p>
+<p>In general, these constrained devices are expected to run either bare metal
+programs or a real-time OS.
+A device that is not constrained should implement the <span><em>Embedded Base Boot Requirements</em> <a class="reference internal" href="about.html#citation-ebbr"><span class="cite">[EBBR]</span></a></span> specification,
+which prescribes the UEFI Capsule Update interface.
+The EBBR specification defines requirements for embedded systems to enable inter-operability between SoCs,
+hardware platforms, firmware implementations, and operating system distributions.
+The aim is to establish consistent boot ABIs and behaviour so that supporting new hardware platforms does not
+require custom engineering work.</p>
+</section>
+<section id="psa-root-of-trust-update">
+<h2>2.2. PSA Root of Trust update</h2>
+<p>The PSA Security Model (SM) requires all of the Mutable PSA Root of Trust
+firmware to be updateable. This may include bootloaders, SPM, Trusted OS,
+and runtime services. In some implementations, the PSA RoT may
+be built using a trusted subsystem with its own isolated and updateable firmware.</p>
+<p>The PSA SM requirements for firmware update are also reflected in
+certifications like NIST IR 8259, ETSI EN 303 645 and PSA Certified.
+The PSA Certified Protection Profiles describes the following objectives,
+where the Target of Evaluation (TOE) refers to the PSA RoT:</p>
+<ul class="simple">
+<li><p>The TOE verifies the integrity and authenticity of the TOE update prior to performing the update.</p></li>
+<li><p>The TOE also rejects attempts of firmware downgrade.</p></li>
+<li><p>This security function mitigates T.UPDATE_ABUSE by preventing installation of firmware from unknown
+sources or installation of obsolete firmware.</p></li>
+</ul>
+<p>T.UPDATE_ABUSE is defined as:</p>
+<blockquote>
+<div><p>“An attacker exploits a flaw in the firmware update mechanisms of the TOE, for instance by sending
+malformed parameters, by altering an authentic firmware update, by installing an old version of
+the firmware or by bypassing security checks, and installs a flawed version of the PSA
+updateable root of trust.”</p>
+</div></blockquote>
+</section>
+<section id="application-root-of-trust-update">
+<h2>2.3. Application Root of Trust update</h2>
+<p>In addition to the PSA Root of Trust firmware, unprivileged
+applications that run in the SPE require updates.
+The applications may be bundled as a single image or
+they may be separate images. This is an OEM and supply chain
+decision.</p>
+<p>In some instances, the authority who signs this firmware
+might be different from the PSA Root of Trust vendor.</p>
+</section>
+<section id="flexiblility-for-different-trust-models">
+<h2>2.4. Flexiblility for different trust models</h2>
+<p>Supply chains dictate a particular trust model for a product.
+A device may have to support firmware updates from multiple, mutually
+distrustful firmware vendors.</p>
+<p>Some regulations may also require
+certain implementations to use Certificate Authorities and PKI.</p>
+<p>Furthermore, the firmware signer might not be the operator of a device.
+An operator of a device may have their own security policy that is
+complimentary to the firmware author’s policy.</p>
+<p>The interface must be flexible enough to support a trust model needed
+by a particular products requirements, without imposing unnecessary
+requirements on constrained devices.</p>
+</section>
+<section id="protocol-independence">
+<h2>2.5. Protocol independence</h2>
+<p>Different protocols are used to communicate with a device depending
+on the industry and application context. This includes open protocols,
+such as LWM2M, and propietary protocols from cloud service providers.
+These protocols serve the specific needs of their respective markets.</p>
+<p>Some of the protocols have metadata that is separate from the images themselves.
+This is taken into account.</p>
+<p>The interface must be independent of the protocol used to recieve an update.</p>
+</section>
+<section id="transport-independence">
+<h2>2.6. Transport independence</h2>
+<p>Embedded devices may recieve firmware updates OTA over different
+transport media depending on the industry and the application.
+This may include, but not limited, to Wi-Fi, LTE, LoRa, and commercial
+low-power wide-area networks (LPWAN).</p>
+<p>Some devices might not be directly connected to a network but may recieve
+updates through a physical interface from an adjacent device, such as
+UART or a CAN bus.</p>
+<p>Firmware installation can take a long time for small devices with very low
+bandwidth. The device may reboot several times while downloading an update.</p>
+<p>The interface must be independent of the transport used to receieve an update.</p>
+</section>
+<section id="hardware-flexibility">
+<h2>2.7. Hardware flexibility</h2>
+<p>The interface is designed to be reasonably efficient to implement
+on different SoC architectures, while providing a consistent interface
+for Update clients or cloud connectors to target.</p>
+<p>For example, the design should be compatible with the following types of system:</p>
+<ul class="simple">
+<li><p>Armv8-M based SoCs that use TrustZone, or equivalent security IP, to protect the SPE.</p></li>
+<li><p>SoCs using multiple CPUs, providing an isolated CPU and flash for the SPE and another for the NSPE.</p></li>
+<li><p>Armv7-M, Armv7-R and Armv8-R based SoCs, that use an MPU to protect the SPE.</p></li>
+<li><p>Armv7-A or Armv8-A based SoCs, using TrustZone to protect the SPE.</p></li>
+</ul>
+<p>In addition to the SoC components, board level features provided by OEMs are also considered.
+This includes peripherals, personalization, and various storage options.</p>
+<p>In some system designs, the application firmware may not be able to update itself without
+interacting with the SPE.</p>
+<p>To enable compile-time and design-time optimization, the interface places
+no requirement on binary compatibility. The interface is therefore described
+as an Application Programming Interface (API) instead of a binary interface.</p>
+</section>
+<section id="composite-devices">
+<h2>2.8. Composite devices</h2>
+<p>Some platforms have specific subsystems that are isolated from the main application or OS.
+These subystems have their own firmware that need updating depending on their criticality.
+For example, this may include radios, secure elements, secure enclaves, or other kinds of
+microcontroller.</p>
+<p>An implementation should be able to support update of these using the interface if this is desired.</p>
+</section>
+<section id="room-for-different-implementations">
+<h2>2.9. Room for different implementations</h2>
+<p>The interface is architectural and does not define a single implementation. For example, some
+implementations can:</p>
+<ul class="simple">
+<li><p>offer a more robust solution while others optimise for device cost.</p></li>
+<li><p>optimise for bandwidth efficiency while others optimise for simplicity</p></li>
+<li><p>provide fine grained update of personalization data while others perform monoloithic updates of all code and data</p></li>
+<li><p>provide enhanced security for stricter markets.</p></li>
+</ul>
+<p>An implementation chooses what features to support. The interface may also
+be ported to systems without an SPE for compatibility benefits.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3><a href="index.html"><b>FWU API</b></a></h3>
+IHI 0093<br/>
+Non-confidential<br/>
+Version 0.7.0-bet.0
+<span style="color: red; font-weight: bold;"></span>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About this document</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#design-goals">2. Design goals</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#suitable-for-constrained-devices">2.1. Suitable for constrained devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#psa-root-of-trust-update">2.2. PSA Root of Trust update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#application-root-of-trust-update">2.3. Application Root of Trust update</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#flexiblility-for-different-trust-models">2.4. Flexiblility for different trust models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#protocol-independence">2.5. Protocol independence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transport-independence">2.6. Transport independence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hardware-flexibility">2.7. Hardware flexibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#composite-devices">2.8. Composite devices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#room-for-different-implementations">2.9. Room for different implementations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html">3. Terminology</a></li>
+<li class="toctree-l1"><a class="reference internal" href="terminology.html#trust-model-and-scenarios">4. Trust model and scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">5. Design overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image-formats.html">6. Image metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">7. API reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="appendix/example-header.html">Example header file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/examples.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/future-changes.html">Future changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/change-history.html">Change history</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; 2020-2021, Arm Limited or its affiliates. All rights reserved.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

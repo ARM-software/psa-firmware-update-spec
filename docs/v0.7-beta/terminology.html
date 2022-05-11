@@ -1,0 +1,283 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>3. Terminology &#8212; FWU API 0.7.0-bet.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="5. Design overview" href="design.html" />
+    <link rel="prev" title="1. Introduction" href="intro.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="terminology">
+<h1>3. Terminology</h1>
+<p id="id1">This section describes important concepts and consistent terms.</p>
+<section id="image">
+<h2>3.1. Image</h2>
+<p>A firmware update consists of one or more images. An image can be:</p>
+<ul class="simple">
+<li><p>A complete image or a partial diff.</p></li>
+<li><p>Compressed.</p></li>
+<li><p>Encrypted. For example, using a pre-provisioned device key.</p></li>
+<li><p>Encoded.</p></li>
+<li><p>Code, data, or both.</p></li>
+<li><p>A single component or multiple components that are linked or packaged together.</p></li>
+</ul>
+<p>An implementation may only support the properties that it needs.</p>
+<p>An image is always associated with some signed metadata. The signed metadata describes:</p>
+<ul class="simple">
+<li><p>The intended device, which might be a specific instance or class.</p></li>
+<li><p>The intended device component. For example, the PSA RoT component.</p></li>
+<li><p>The digest of the image.</p></li>
+<li><p>Anti-rollback information.</p></li>
+<li><p>Any dependencies.</p></li>
+</ul>
+<p>Additional metadata can be included to provide hints or explicit instructions on how to decrypt, decompress or install an image.
+It may also describe whether the component needs to be restarted.</p>
+</section>
+<section id="trust-anchor">
+<h2>3.2. Trust anchor</h2>
+<p>A device contains one or more <strong>trust anchors</strong>. A trust anchor is used to check if an image
+and its metadata are signed by a signing authority that the device trusts.</p>
+<p>Each trust anchor is pre-provisioned on the device. A trust anchor
+can be implemented in many ways, but typically takes the form of a public key or certificate chain, depending
+on the complexity of the trust model.</p>
+<p>The management and provisioning of trust anchors is not within the scope of this document.</p>
+<p>An example of a trust anchor is the Root of Trust Public Key (ROTPK), which is defined in the Trusted Base System Architecture.</p>
+</section>
+<section id="installer">
+<h2>3.3. Installer</h2>
+<p id="image-states">An installer is a part of the device that processes an image.
+An image can be in different states when it is on a device:</p>
+<ul class="simple">
+<li><p>When an image is not installed, the image is referred to as a <strong>candidate image</strong>.</p></li>
+<li><p>When an image is ready to run, it is installed, and the image is referred to as an <strong>installed image</strong>. The
+process of converting a candidate image to an installed image is as follows:</p>
+<ol class="arabic simple">
+<li><p>An installer verifies that the image metadata is signed by an appropriate trust anchor.</p></li>
+<li><p>An installer verifies that all installation conditions and dependencies are satisfied.</p></li>
+<li><p>An installer takes the necessary steps to apply the update. A reboot might be needed
+during the installation.</p></li>
+</ol>
+</li>
+<li><p>If an image requires a reboot to complete installation, then the image is set to a <strong>reboot needed</strong> state.</p></li>
+<li><p>When an image fails installation, it is referred to as a <strong>rejected image</strong>.
+If the severity of the failure is recoverable, the implementation may choose to
+turn the rejected image into a candidate image again. A rejected image might be marked
+as invalid and should be erased or overwritten.</p></li>
+<li><p>An implementation can optionally support a state where an image is tested for functional correctness before
+it is fully installed. This state is referred to as a <strong>pending install</strong> state. An implementation can also
+choose to support this state for selected types of image. This state must meet all the same security
+conditions as an installed image.</p></li>
+</ul>
+<p>The architectural states and the permitted transitions are shown in the following diagram:</p>
+<div class="graphviz"><img src="_images/graphviz-73e882f896606a40cedd8026c67407d04661284c.png" alt="digraph finite_state_machine {
+        rankdir=LR;
+        size=&quot;8,5&quot;
+        node [shape = oval]; CANDIDATE INSTALLED REJECTED;
+        node [shape = oval];
+        CANDIDATE -&gt; &quot;PENDING_INSTALL\n(optional)&quot;;
+        CANDIDATE -&gt; REJECTED;
+        &quot;PENDING_INSTALL\n(optional)&quot; -&gt; INSTALLED;
+        &quot;PENDING_INSTALL\n(optional)&quot; -&gt; REJECTED;
+        &quot;CANDIDATE&quot; -&gt; &quot;REBOOT_NEEDED&quot;;
+        &quot;REBOOT_NEEDED&quot; -&gt; &quot;PENDING_INSTALL\n(optional)&quot;;
+        &quot;REBOOT_NEEDED&quot; -&gt; &quot;REJECTED&quot;;
+        &quot;REBOOT_NEEDED&quot; -&gt; &quot;INSTALLED&quot;;
+        CANDIDATE -&gt; INSTALLED;
+        REJECTED -&gt; CANDIDATE;
+}" class="graphviz" /></div>
+<div class="admonition-implementation-note admonition">
+<p class="admonition-title">Implementation note:</p>
+<p>For example, an installer might be a secure bootloader or runtime software.
+An installer can also be split across multiple components.</p>
+<p>Some devices require protection against failure of a new image by retention of a known good image, normally
+the current image. This implies sufficient NVM to store two images. The simplest case is when both images might
+be stored on the device in eFlash, in which case the eFlash has to be dimensioned for two image slots, a primary
+slot and a secondary slot. The same principle can be applied for external flash.
+A system that uses two slots with a hardware banking mechanism might contain installed images in both slots.</p>
+</div>
+</section>
+<section id="update-client">
+<h2>3.4. Update client</h2>
+<p>A software component that downloads images.
+It may initiate the download (pull model) or wait until it recieves
+a notification to fetch (push model).</p>
+<p>The Update client runs as part of the <a class="reference internal" href="about.html#term-application-firmware"><span class="term">application firmware</span></a>.</p>
+<p>It may report device identity and installation state to a remote party using the
+<span><em>PSA Attestation API</em> <a class="reference internal" href="about.html#citation-psa-att"><span class="cite">[PSA-ATT]</span></a></span>, which returns an Entity Attestation Token (EAT).
+For example, the reported installation state can include the versions of installed images
+and error information of images that did not install successfully.</p>
+<p>When it downloads an image, it transfers it to the installer
+using the interface described in this document.</p>
+</section>
+<section id="secure-processing-environment-spe">
+<h2>3.5. Secure Processing Environment (SPE)</h2>
+<p>An isolated environment that hosts the PSA Root of Trust and Application Root of Trust.
+It is isolated from the Non-secure Processing Environment (NSPE).</p>
+<p>The SPE protects the trust anchors.</p>
+<p>The SPE is an installer and installs SPE images. In some constrained implementations, it
+may also install NSPE images.</p>
+<p>The SPE also contains storage that is protected from the NSPE and from physical snooping.</p>
+<p>The SPE also contains the secure bootloader needed for Trusted Boot, see <span><em>PSA Trusted Boot and Firmware Update</em> <a class="reference internal" href="about.html#citation-psa-tb"><span class="cite">[PSA-TB]</span></a></span>.</p>
+<p>The SPE has a means of recovery if a newly installed image fails after an update.</p>
+</section>
+<section id="staging-area">
+<h2>3.6. Staging area</h2>
+<p>A staging area is an area of memory used to verify an image.
+The staging area might be in NVM or RAM and
+thus not guaranteed to be non-volatile.
+The choice of memory depends on resource constraints and the
+nature of an update.</p>
+<p>The staging area might also be protected by a Secure Processing Environment
+or resident on another processor.</p>
+<p>The size of a staging area is pre-determined by the implementation.
+This avoids contention of system resources.</p>
+<p>An implementation might have one staging area per type of image.</p>
+<p>The <a class="reference internal" href="about.html#term-update-client"><span class="term">Update client</span></a> is responsible for deciding when to erase the staging area.</p>
+</section>
+</section>
+<section id="trust-model-and-scenarios">
+<h1>4. Trust model and scenarios</h1>
+<p id="trust-models">The following actor definitions are taken from the IETF SUIT architecture draft:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Author: The author is the entity that creates the firmware image.
+There may be multiple authors in a system either when a device
+consists of multiple microcontrollers or when the the final
+firmware image consists of software components from multiple
+companies.</p></li>
+<li><p>Device Operator: The actor responsible for the day-to-day
+operation of a fleet of devices.</p></li>
+<li><p>Network Operator: The actor responsible for the operation of a
+network to which devices connect.</p></li>
+<li><p>Status Tracker: The status tracker offers device management
+functionality to retrieve information about the installed firmware
+on a device and other device characteristics (including free
+memory and hardware components), to obtain the state of the
+firmware update cycle the device is currently in, and to trigger
+the update process. The deployment of status trackers is flexible
+and they may be used in cloud-based servers, on-premise servers,
+embedded in edge computing device, etc.</p></li>
+</ul>
+</div></blockquote>
+<p>The implementor of the interface described within this document always:</p>
+<ul class="simple">
+<li><p>verifies that the image metadata is signed by a trusted author before installation</p></li>
+<li><p>verifies that the image metadata complies with the platform’s security policy</p></li>
+<li><p>verifies the image itself using information from the metadata</p></li>
+<li><p>trusts authors for specific purposes only (e.g. the NSPE author cannot directly overwrite images in the SPE)</p></li>
+</ul>
+<p>The <a class="reference internal" href="about.html#term-update-client"><span class="term">Update client</span></a>, the consumer of the interface, is only trusted for the following
+purposes:</p>
+<ul class="simple">
+<li><p>Downloading images from an approved image repository decided by the Device Operator.</p></li>
+<li><p>Selecting the images that the Status Tracker wants installed.</p></li>
+<li><p>Obeying the restrictions of the Network Operator.</p></li>
+</ul>
+<p>Depending on the threat model, the following should also be considered:</p>
+<ul class="simple">
+<li><p>If an image is tested before it is permanently installed then a component
+in the system needs to approve or reject images if they detect a fault during
+testing. Typically, only a single component can vouch for system wide
+functional correctness. The update client might be trusted to make decisions
+during a test.</p></li>
+<li><p>Certain images might contain confidential code or data
+that must never be exposed to the NSPE. Therefore, some images might be encrypted with
+a key that is private to the SPE and when decryption occurs the data is stored in storage
+that is inaccessible from the NSPE.</p></li>
+</ul>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><h3><a href="index.html"><b>FWU API</b></a></h3>
+IHI 0093<br/>
+Non-confidential<br/>
+Version 0.7.0-bet.0
+<span style="color: red; font-weight: bold;"></span>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="about.html">About this document</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">1. Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro.html#design-goals">2. Design goals</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">3. Terminology</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#image">3.1. Image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#trust-anchor">3.2. Trust anchor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installer">3.3. Installer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#update-client">3.4. Update client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#secure-processing-environment-spe">3.5. Secure Processing Environment (SPE)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#staging-area">3.6. Staging area</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#trust-model-and-scenarios">4. Trust model and scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="design.html">5. Design overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image-formats.html">6. Image metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">7. API reference</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="appendix/example-header.html">Example header file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/examples.html">Example usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/future-changes.html">Future changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="appendix/change-history.html">Change history</a></li>
+</ul>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy; 2020-2021, Arm Limited or its affiliates. All rights reserved.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
