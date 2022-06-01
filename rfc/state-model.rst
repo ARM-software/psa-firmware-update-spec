@@ -6,7 +6,7 @@ The version 0.7 specification defines a state model based around the lifecycle o
 .. image:: permitted-state-transitions.svg
     :width: 75%
 
-A state model based on an image state is informative, but is not the best basis for the Firmware Update API. In the process of updating a single firmware compoment, the current installed firmware is maintained while a new image is be prepared, verified, and tested; prior to committing to the new firmware image.
+A state model based on an image state is informative, but is not the best basis for the Firmware Update API. In the process of updating a single firmware component, the current installed firmware is maintained while a new image is be prepared, verified, and tested; prior to committing to the new firmware image.
 
 It is more helpful to track the state of the Firmware store, that contains these images for a component. From the firmware store state, the states of the individual images can be inferred.
 
@@ -14,7 +14,7 @@ It is more helpful to track the state of the Firmware store, that contains these
 Firmware Components
 -------------------
 
-Firmware is likely to be split into logical components that apply to a single element inside a device, e.g. the main firmware, the radio module, the secure processing environment, and so on. Firmware components are referred to by a single numerical identifier, unique for each element in the device. Assigning those numbers and sharing them between the Update Client and the Update Service is not specified here and is *IMPDEF*. This is most likely done at build or integration time.
+Firmware is likely to be split into logical components that apply to a single element inside a device, e.g. the main firmware, the radio module, the secure processing environment, and so on. Firmware components are referred to by a single numerical identifier, unique for each element in the device. Assigning those numbers and sharing them between the Update Client and the Update Service is not specified here and is implementation-defined. This is most likely done at build or integration time.
 
 The Firmware update state model described here applies separately to the firmware store for each component.
 
@@ -60,7 +60,7 @@ A persistent state model for an in-progress Firmware Update is required for two 
 
 The basic flow required to update firmware within the constraints and meeting the requirements identified for the API is captured in the existing v0.7 document.
 
-For version 1.0, we propose to present the same operational flow as a state model of the **Firmware Store**, instaead of an **individual image**, and the existing APIs will work to cause transitions within this alternative state model.
+For version 1.0, we propose to present the same operational flow as a state model of the **Firmware Store**, instead of an **individual image**, and the existing APIs will work to cause transitions within this alternative state model.
 
 Note
     Although readers might be familiar with the v0.7 image lifecycle-based state model, the definition of a Firmware Store-based state model is clearer without providing explicit linkage to the image states defined in v0.7.
@@ -102,7 +102,7 @@ A proposed set of Firmware Store states is as follows:
         In this state, the previously installed *active* image is preserved as the *second*. If the trial is explicitly rejected, or the system restarts without accepting the trial, the previously installed image is re-installed and the trial image is rejected.
 
     * - REJECTED
-      - The *active* trial image has been rejected, but the system must be restarted so the bootloader can revert to the previous image (saved as the *second*).
+      - The *active* trial image has been rejected, but the system must be restarted so the Bootloader can revert to the previous image (saved as the *second*).
 
         This state is transient.
 
@@ -129,7 +129,7 @@ The Client can trigger transitions in the state model using the following operat
 * ``start``
 * ``write``
 * ``install``
-* ``erase``
+* ``clean``
 * ``accept``
 * ``reject``
 
@@ -165,7 +165,7 @@ State/operation transition matrix
       - ``reboot``
       - ``accept``
       - ``reject``
-      - ``erase``
+      - ``clean``
 
     * - READY
       - Begin update →WRITING
@@ -236,7 +236,7 @@ Transitions to a new state are necessary when a `reboot` occurs, and the Bootloa
 
 Should we specify the required behavior for other failed operations, such as a verification or dependency failure during `install`? Requiring a state change to FAILED does prevent a Client from attempting to call `install` again (and repeating a check that will fail). But if we do this, what about errors during `write`?
 
-We could permit implementations to make a transition - and leave it IMPDEF. It might be necessary to do so, as the state is persistent, and the process of changing the state involves updates to storage - and making such updates behave atomically could be prohibitive. In this scenario, permitting the implementation to record that the component is in FAILED state is probably preferrable to mandating that it recovers to the prior state.
+We could permit implementations to make a transition - and leave it implementation-defined. It might be necessary to do so, as the state is persistent, and the process of changing the state involves updates to storage - and making such updates behave atomically could be prohibitive. In this scenario, permitting the implementation to record that the component is in FAILED state is probably preferable to mandating that it recovers to the prior state.
 
 
 Variation in system design parameters
@@ -252,7 +252,7 @@ There are many such variations, and it expected to be less confusing to provide 
 Appendix: Operation comparison with v0.7
 ----------------------------------------
 
-Most of the Client operations align with the functions in the v0.7 API. This RFC proposes some changes related to the start of the update process, and renaming of the ``start``, ``reject`` and ``erase`` operations. The following table summarises the relationship:
+Most of the Client operations align with the functions in the v0.7 API. This RFC proposes some changes related to the start of the update process, and renaming of the ``start``, ``reject`` and ``clean`` operations. The following table summarizes the relationship:
 
 ==============       =============
 v1.0 operation       v0.7 API name
@@ -262,7 +262,7 @@ v1.0 operation       v0.7 API name
 ``install``          ``psa_fwu_install()``
 ``reject``           ``psa_fwu_request_rollback()``
 ``accept``           ``psa_fwu_accept()``
-``erase``            ``psa_fwu_abort()``
+``clean``            ``psa_fwu_abort()``
 ==============       =============
 
 
@@ -277,21 +277,21 @@ Rationale
     This explicitly identifies a component as being part of the current update process. This enables the specification of the behavior of the simultaneous update of multiple firmware components.
 
 Note
-    As the transition to WRITING uses an explicit ``start`` operation, the process of cleaning the *second* could be made implicit as part of this operation, instead of using a separate ``erase`` operation.
+    As the transition to WRITING uses an explicit ``start`` operation, the process of cleaning the *second* could be made implicit as part of this operation, instead of using a separate ``clean`` operation.
 
-    However, the provision of support for breaking up long-running operations is simpler if the potentially very slow ``erase`` activity is separated from the ``start`` activity.
+    However, the provision of support for breaking up long-running operations is simpler if the potentially very slow ``clean`` activity is separated from the ``start`` activity.
 
 Abandon and clean up an update operation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In v0.7, the ``abort`` operation was used to abandon an update process and return the system to a state where a new update could be attempted. One aspect of this operation is to clear the storage location of a partial or failed update image.
 
-However, there are several situations in the v0.7 state model where erasing of the storage has to occur as an implicit effect of another operation, such as ``write``.
+However, there are several situations in the v0.7 state model where clean of the storage has to occur as an implicit effect of another operation, such as ``write``.
 
-For v1.0, we make the clearing of the storage always the result of an explicit ``erase`` operation, and we include the other aspects of the v0.7 ``abort`` operation. From any state except an active or rejected TRIAL, the ``erase`` operation will return to the READY state. A new update process cannot be started, until the firmware store is in a READY state.
+For v1.0, we make the clearing of the storage always the result of an explicit ``clean`` operation, and we include the other aspects of the v0.7 ``abort`` operation. From any state except an active or rejected TRIAL, the ``clean`` operation will return to the READY state. A new update process cannot be started, until the firmware store is in a READY state.
 
 Rationale
-    The provision of support for breaking up long-running operations is simpler if the potentially very slow ``erase`` activity is separated from other operations.
+    The provision of support for breaking up long-running operations is simpler if the potentially very slow ``clean`` activity is separated from other operations.
 
 
 -----
