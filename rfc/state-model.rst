@@ -32,7 +32,7 @@ For a firmware component, depending on the state or progress of a firmware updat
 
 Assuming that the firmware component is essential for system operation, there will always be exactly one image of type (1). Other images might, or might not, be present in the store.
 
-Although a Firmware store in a specific system might have storage for more than two firmware images, we define a state model for the Firmware Store that only requires two. This is possible because the store does not need to hold more than one firmware image of type (2), (3), or (4) concurrently.
+Although a Firmware store in a specific system might have storage for more than two firmware images, we define a state model for the Firmware Store that only requires two. This is possible because the store does not need to hold more than one firmware image of type (2), (3), or (4) concurrently. The implementation can have storage for more than two images, and will select the appropriate storage area for a requested operation.
 
 Instead of identifying a physical storage location (sometimes referred to as a 'bank' or 'slot') for the firmware images, the API uses the following (*working names*) for the two required locations:
 
@@ -68,7 +68,7 @@ Note
 Firmware Store states
 ~~~~~~~~~~~~~~~~~~~~~
 
-A proposed set of Firmware Store states is as follows:
+The proposed set of Firmware Store states is as follows:
 
 .. list-table::
     :header-rows: 1
@@ -91,33 +91,42 @@ A proposed set of Firmware Store states is as follows:
 
         This state is transient.
 
-    * - FAILED
+    * - FAILED [a]_
       - An installation of the *second* has been attempted, but has failed for some reason. The failure reason is recorded in the Store.
 
-        The *second* needs to be erased before another update can be attempted.
+        The *second* needs to be cleaned before another update can be attempted.
 
     * - TRIAL
       - Installation of the *second* has succeeded, and is now the *active* running in 'trial mode'. This state is transient, and requires the Client to explicitly accept the trial to make the update permanent.
 
         In this state, the previously installed *active* image is preserved as the *second*. If the trial is explicitly rejected, or the system restarts without accepting the trial, the previously installed image is re-installed and the trial image is rejected.
 
-    * - REJECTED
+    * - REJECTED [b]_
       - The *active* trial image has been rejected, but the system must be restarted so the Bootloader can revert to the previous image (saved as the *second*).
 
         This state is transient.
 
-    * - UPDATED
+    * - UPDATED [c]_
       - The *active* trial image has been accepted, and is now permanently active.
 
-        The *second* contains the now-expired previous firmware image, which needs to be erased before another update can be started.
+        The *second* contains the now-expired previous firmware image, which needs to be cleaned before another update can be started.
 
-Note
-    In the basic flow here, REJECTED seems to have limited difference from TRIAL, other than that it records that the trial has been explicitly rejected.
+.. [a] The FAILED state is required to enable a Client to detect that an attempted installation failed during `reboot`, and determine the reason for the failure.
 
-    However, it provides two important capabilities:
+.. [b] The REJECTED state has limited difference from TRIAL, other than that it records that the trial has been explicitly rejected. However, this approach specifically prevents the Client accepting a trial after rejecting it; and enables other TRIAL policies to be implemented, such as permitting a limited number of restarts before automatically reverting to the previous image.
 
-    * It specifically prevents the Client accepting a trial after rejecting it
-    * It enables other TRIAL policies, such as permitting a limited number of restarts (but more than one) before automatically reverting to the previous image.
+.. [c] The UPDATED state always transitions to READY before starting a new update. Although the `clean` and `start` transitions could be merged, the separation of the states enables a possibly expensive `clean` operation to be called independently of starting a new update.
+
+The full set of states is necessary for components that require both of the following:
+
+1. A reboot is required to complete installation of a new image
+2. The image must be tested prior to acceptance
+
+The following descriptions of the `state model <state transitions_>`_ and `transition matrix <state matrix_>`_ are for this type of component.
+
+For components that do not require testing of new firmware before acceptance, or components that do not require a reboot to complete installation, only a subset of these states are visible to the Update Client. Some common variations are `described later <variations_>`_, including the impact on the state model for such components.
+
+.. _reboot trial model:
 
 State transitions
 ~~~~~~~~~~~~~~~~~
@@ -142,6 +151,8 @@ The typical flow through the states is shown in this graphic:
 The depicted flow does not show the behavior in error scenarios, except for the transitions over reboot where a failure can only be reported to the Client by changing the state of the Firmware Store.
 
 The READY state at the end is different to the one at the start --- the *active* firmware image is the updated version. The Firmware Store is ready to start the process again from the beginning for the next update.
+
+.. _state matrix:
 
 State/operation transition matrix
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -227,8 +238,72 @@ State/operation transition matrix
       - *Error*
       - Clean *second* →READY
 
-Error scenarios (open issue)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. _variations:
+
+Variation in system design parameters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Depending on the system design and product requirements, an implementation can collapse a chain of transitions for a component, where this does not remove information that is required by the Client, or compromise other system requirements. This can result in some states and transitions being eliminated from the state model for that component's firmware store.
+
+Some possible variations are the following:
+
+===============  ==============  ===========
+Reboot required  Trial required  Description
+===============  ==============  ===========
+Yes              Yes             See `full state model <reboot trial model_>`_
+Yes              No              See `no-trial model <reboot notrial model_>`_
+No               Yes             See `no-reboot model <noreboot trial model_>`_
+No               No              See `basic state model <noreboot notrial model_>`_
+===============  ==============  ===========
+
+.. _reboot notrial model:
+
+Components that require a reboot, but no trial
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If a component does not require testing before committing the update, the the TRIAL and REJECTED states are not used. The `reboot` operation that installs the firmware will transition to UPDATED on success, or FAILED on failure. The `accept` and `reject` operations are never used.
+
+The simplified flow is as follows:
+
+.. image:: fwu-states-simple-no-trial.svg
+
+.. _noreboot trial model:
+
+Components that require a trial, but no reboot
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If a component does not require a reboot to complete installation, the STAGED state is not required. The `install` operation will complete the installation immediately, transitioning to TRIAL if successful (see `Open issues`_ regarding the behavior on a failed installation).
+
+This use cases also removes the REJECTED state, because the `reject` operation also does not require a `reboot` to complete. A `reject` operation from TRIAL states transitions directly to FAILED.
+
+The simplified flow is as follows:
+
+.. image:: fwu-states-simple-no-reboot.svg
+
+*Notes*
+
+1. It is not strictly necessary to provide a state from which the Client can determine the installation failure or rejection reason, as these operations do not occur over a `reboot`. The FAILED state could be eliminated for this use case, with `reject` incorporating the `clean` operation.
+
+2. There is no ability for the Update Service to automatically reject a TRIAL, because the "`reboot` without `accept`" condition used for this purpose in the full state model is not available in this use case.
+
+.. _noreboot notrial model:
+
+Components that require neither a reboot, nor a trial
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If a component does not require a reboot to complete installation, and does not require testing before committing the update, then
+the STAGED, TRIAL, REJECTED, and FAILED states are not required. The `install` operation will complete the installation immediately, transitioning to UPDATED if successful (see `Open issues`_ regarding the behavior on a failed installation).
+
+The simplified flow is as follows:
+
+.. image:: fwu-states-simple-no-reboot-no-trial.svg
+
+
+Open issues
+-----------
+
+Transitions in error scenarios
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The existing specification states that when an operation fails, the state should remain unchanged. However, the state diagrams show some transitions on failure to REJECTED state, for example if `install` fails.
 
@@ -238,13 +313,12 @@ Should we specify the required behavior for other failed operations, such as a v
 
 We could permit implementations to make a transition - and leave it implementation-defined. It might be necessary to do so, as the state is persistent, and the process of changing the state involves updates to storage - and making such updates behave atomically could be prohibitive. In this scenario, permitting the implementation to record that the component is in FAILED state is probably preferable to mandating that it recovers to the prior state.
 
+Support for variations
+~~~~~~~~~~~~~~~~~~~~~~
 
-Variation in system design parameters
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The section on variations_ describes three additional component update use cases, based on whether a reboot is required to complete installation, and whether the image must be tested before finalizing the update.
 
-Depending on the system design and product requirements, an implementation can collapse a chain of transitions, where this does not remove information that is required by the Client, or compromise other system requirements. This can result in some states and transitions being eliminated from the state model for that system.
-
-There are many such variations, and it expected to be less confusing to provide separate definitions of the applicable state model for each class of system, describe the subset of states and transitions required, and present a flow diagram that is specific to that scenario.
+Are all of these use cases important for documenting in version 1.0?
 
 
 ------
