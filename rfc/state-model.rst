@@ -47,7 +47,7 @@ Depending on the system and memory design, the *active* and *second* locations c
 
 During the course of an update, a specific firmware image can change from being *active* to *second*, or from *second* to *active*. For example:
 
-* An image will switch from being *second* --- while being prepared --- to *active* following installation.
+* An image will switch from being *second* - while being prepared - to *active* following installation.
 * An image will switch from being *active* to *second* when it becomes the backup image during installation of new firmware.
 
 Firmware Store state model
@@ -122,11 +122,9 @@ The full set of states is necessary for components that require both of the foll
 1. A reboot is required to complete installation of a new image
 2. The image must be tested prior to acceptance
 
-The following descriptions of the `state model <state transitions_>`_ and `transition matrix <state matrix_>`_ are for this type of component.
+The following descriptions of the `state model <State transitions_>`_ and `transition matrix <State/operation transition matrix_>`_ are for this type of component.
 
-For components that do not require testing of new firmware before acceptance, or components that do not require a reboot to complete installation, only a subset of these states are visible to the Update Client. Some common variations are `described later <variations_>`_, including the impact on the state model for such components.
-
-.. _reboot trial model:
+For components that do not require testing of new firmware before acceptance, or components that do not require a reboot to complete installation, only a subset of these states are visible to the Update Client. Some common variations are `described later <Variation in system design parameters_>`_, including the impact on the state model for such components.
 
 State transitions
 ~~~~~~~~~~~~~~~~~
@@ -151,8 +149,6 @@ The typical flow through the states is shown in this graphic:
 The depicted flow does not show the behavior in error scenarios, except for the transitions over reboot where a failure can only be reported to the Client by changing the state of the Firmware Store.
 
 The READY state at the end is different to the one at the start --- the *active* firmware image is the updated version. The Firmware Store is ready to start the process again from the beginning for the next update.
-
-.. _state matrix:
 
 State/operation transition matrix
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -238,10 +234,8 @@ State/operation transition matrix
       - *Error*
       - Clean *second* →READY
 
-.. _variations:
-
 Variation in system design parameters
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------
 
 Depending on the system design and product requirements, an implementation can collapse a chain of transitions for a component, where this does not remove information that is required by the Client, or compromise other system requirements. This can result in some states and transitions being eliminated from the state model for that component's firmware store.
 
@@ -250,16 +244,14 @@ Some possible variations are the following:
 ===============  ==============  ===========
 Reboot required  Trial required  Description
 ===============  ==============  ===========
-Yes              Yes             See `full state model <reboot trial model_>`_
-Yes              No              See `no-trial model <reboot notrial model_>`_
-No               Yes             See `no-reboot model <noreboot trial model_>`_
-No               No              See `basic state model <noreboot notrial model_>`_
+Yes              Yes             See `full state model <State transitions_>`_
+Yes              No              See `no-trial model <Components that require a reboot, but no trial_>`_
+No               Yes             See `no-reboot model <Components that require a trial, but no reboot_>`_
+No               No              See `basic state model <Components that require neither a reboot, nor a trial_>`_
 ===============  ==============  ===========
 
-.. _reboot notrial model:
-
 Components that require a reboot, but no trial
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If a component does not require testing before committing the update, the the TRIAL and REJECTED states are not used. The `reboot` operation that installs the firmware will transition to UPDATED on success, or FAILED on failure. The `accept` and `reject` operations are never used.
 
@@ -267,10 +259,8 @@ The simplified flow is as follows:
 
 .. image:: fwu-states-simple-no-trial.svg
 
-.. _noreboot trial model:
-
 Components that require a trial, but no reboot
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If a component does not require a reboot to complete installation, the STAGED state is not required. The `install` operation will complete the installation immediately, transitioning to TRIAL if successful (see `Open issues`_ regarding the behavior on a failed installation).
 
@@ -286,10 +276,8 @@ The simplified flow is as follows:
 
 2. There is no ability for the Update Service to automatically reject a TRIAL, because the "`reboot` without `accept`" condition used for this purpose in the full state model is not available in this use case.
 
-.. _noreboot notrial model:
-
 Components that require neither a reboot, nor a trial
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If a component does not require a reboot to complete installation, and does not require testing before committing the update, then
 the STAGED, TRIAL, REJECTED, and FAILED states are not required. The `install` operation will complete the installation immediately, transitioning to UPDATED if successful (see `Open issues`_ regarding the behavior on a failed installation).
@@ -316,7 +304,7 @@ We could permit implementations to make a transition - and leave it implementati
 Support for variations
 ~~~~~~~~~~~~~~~~~~~~~~
 
-The section on variations_ describes three additional component update use cases, based on whether a reboot is required to complete installation, and whether the image must be tested before finalizing the update.
+The section on `variations <Variation in system design parameters_>`_ describes three additional component update use cases, based on whether a reboot is required to complete installation, and whether the image must be tested before finalizing the update.
 
 Are all of these use cases important for documenting in version 1.0?
 
