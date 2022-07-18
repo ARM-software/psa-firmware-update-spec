@@ -23,7 +23,7 @@ Analysis
 
 When the client first runs after a system restart, it needs to query the state of Firmware Update for each firmware component. The response is used to determine if any FWU operations are required.
 
-For a firmware component, depending on the state or progress of a firmware update, there can be one or more firmware images currently in the firmware store:
+For each firmware component, depending on the state or progress of a firmware update, there can be one or more firmware images currently in the firmware store:
 
 1. An image that is actively in use by the system.
 2. An image that is being prepared for installation.
@@ -188,8 +188,8 @@ State/operation transition matrix
       - Verify *second* →STAGED
       - no effect
       - *Error*
+      - Abort update →FAILED
       - *Error*
-      - Clean *second* →READY
     * - STAGED
       - *Error*
       - *Error*
@@ -199,8 +199,8 @@ State/operation transition matrix
         else:
           Record error →FAILED
       - *Error*
+      - Abort update →FAILED
       - *Error*
-      - Clean *second* →READY
     * - FAILED
       - *Error*
       - *Error*
@@ -253,7 +253,7 @@ No               No              See `basic state model <Components that require
 Components that require a reboot, but no trial
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If a component does not require testing before committing the update, the the TRIAL and REJECTED states are not used. The `reboot` operation that installs the firmware will transition to UPDATED on success, or FAILED on failure. The `accept` and `reject` operations are never used.
+If a component does not require testing before committing the update, the the TRIAL and REJECTED states are not used. The `reboot` operation that installs the firmware will transition to UPDATED on success, or FAILED on failure. The `accept` operation is never used, the `reject` operation is still used to cancel an update that has been started.
 
 The simplified flow is as follows:
 
@@ -264,7 +264,7 @@ Components that require a trial, but no reboot
 
 If a component does not require a reboot to complete installation, the STAGED state is not required. The `install` operation will complete the installation immediately, transitioning to TRIAL if successful (see `Open issues`_ regarding the behavior on a failed installation).
 
-This use cases also removes the REJECTED state, because the `reject` operation also does not require a `reboot` to complete. A `reject` operation from TRIAL states transitions directly to FAILED.
+This use case also removes the REJECTED state, because the `reject` operation from TRIAL state does not require a `reboot` to complete. A `reject` operation from TRIAL states transitions directly to FAILED.
 
 The simplified flow is as follows:
 
@@ -272,15 +272,13 @@ The simplified flow is as follows:
 
 *Notes*
 
-1. It is not strictly necessary to provide a state from which the Client can determine the installation failure or rejection reason, as these operations do not occur over a `reboot`. The FAILED state could be eliminated for this use case, with `reject` incorporating the `clean` operation.
-
-2. There is no ability for the Update Service to automatically reject a TRIAL, because the "`reboot` without `accept`" condition used for this purpose in the full state model is not available in this use case.
+1. There is no ability for the Update Service to automatically reject a TRIAL, because the "`reboot` without `accept`" condition used for this purpose in the full state model is not available in this use case.
 
 Components that require neither a reboot, nor a trial
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If a component does not require a reboot to complete installation, and does not require testing before committing the update, then
-the STAGED, TRIAL, REJECTED, and FAILED states are not required. The `install` operation will complete the installation immediately, transitioning to UPDATED if successful (see `Open issues`_ regarding the behavior on a failed installation).
+the STAGED, TRIAL, and REJECTED states are not required. The `install` operation will complete the installation immediately, transitioning to UPDATED if successful (see `Open issues`_ regarding the behavior on a failed installation).
 
 The simplified flow is as follows:
 
@@ -350,7 +348,7 @@ In v0.7, the ``abort`` operation was used to abandon an update process and retur
 
 However, there are several situations in the v0.7 state model where clean of the storage has to occur as an implicit effect of another operation, such as ``write``.
 
-For v1.0, we make the clearing of the storage always the result of an explicit ``clean`` operation, and we include the other aspects of the v0.7 ``abort`` operation. From any state except an active or rejected TRIAL, the ``clean`` operation will return to the READY state. A new update process cannot be started, until the firmware store is in a READY state.
+For v1.0, we make the clearing of the storage always the result of an explicit ``clean`` operation. The 'cancel the current update' aspect of the v0.7 ``abort`` operation is now available from the ``reject`` operation. The ``reject`` operation can be used to abort an update from WRITING, STAGED, or TRIAL states; following this, the ``clean`` operation will return to the READY state. A new update process cannot be started, until the firmware store is in a READY state.
 
 Rationale
     The provision of support for breaking up long-running operations is simpler if the potentially very slow ``clean`` activity is separated from other operations.
