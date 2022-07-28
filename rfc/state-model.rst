@@ -177,6 +177,9 @@ The READY state at the end is different to the one at the start --- the *active*
 State/operation transition matrix
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. |_| unicode:: 0xA0
+   :trim:
+
 .. list-table::
     :header-rows: 2
     :stub-columns: 1
@@ -203,7 +206,7 @@ State/operation transition matrix
       - ``clean``
 
     * - READY
-      - Begin update → WRITING
+      - Begin update →WRITING
       - *Error*
       - *Error*
       - *Error*
@@ -215,8 +218,8 @@ State/operation transition matrix
     * - WRITING
       - *Error*
       - Write *second*
-      - Verify *second* → CANDIDATE
-      - Abort update → FAILED
+      - Verify *second* →CANDIDATE
+      - Abort update →FAILED
       - no effect
       - no effect
       - no effect
@@ -226,8 +229,8 @@ State/operation transition matrix
       - *Error*
       - *Error*
       - *Error*
-      - Abort update → FAILED
-      - Verify *second* → STAGED
+      - Abort update →FAILED
+      - Verify *second* →STAGED
       - no effect
       - no effect
       - no effect
@@ -238,12 +241,12 @@ State/operation transition matrix
       - *Error*
       - *Error*
       - *Error*
-      - Install Ok?
-          Swap images
-          →TRIAL
-        else:
-          Record error
-          →FAILED
+      - | Install Ok?
+        | |_| |_| Swap images
+        | |_| |_| →TRIAL
+        | else:
+        | |_| |_| Record error
+        | |_| |_| →FAILED
       - *Error*
       - Abort update →FAILED
       - *Error*
