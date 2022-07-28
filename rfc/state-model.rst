@@ -32,7 +32,7 @@ For each firmware component, depending on the state or progress of a firmware up
 
 Assuming that the firmware component is essential for system operation, there will always be exactly one image of type (1). Other images might, or might not, be present in the store.
 
-Although a Firmware store in a specific system might have storage for more than two firmware images, we define a state model for the Firmware Store that only requires two. This is possible because the store does not need to hold more than one firmware image of type (2), (3), or (4) concurrently. The implementation can have storage for more than two images, and will select the appropriate storage area for a requested operation.
+Although a Firmware store in a specific system might have storage for more than two firmware images, we define a state model for the Firmware Store that only requires two. This is possible because the store does not need to hold more than one firmware image of type (2), (3), or (4) concurrently. The implementation can have storage for more than two images, and will select the appropriate storage area for a requested operation. For example, providing additional image storage locations can reduce the need to carry out expensive erase operations on the storage during normal device operation.
 
 Instead of identifying a physical storage location (sometimes referred to as a 'bank' or 'slot') for the firmware images, the API uses the following (*working names*) for the two required locations:
 
@@ -50,6 +50,25 @@ During the course of an update, a specific firmware image can change from being 
 * An image will switch from being *second* - while being prepared - to *active* following installation.
 * An image will switch from being *active* to *second* when it becomes the backup image during installation of new firmware.
 
+Multi-component updates
+~~~~~~~~~~~~~~~~~~~~~~~
+
+System with multiple components might require that more than one component is updated simultaneously. This is necessary if there is a cyclic version dependency between the updated components, and updating components one by one is not possible.
+
+To support this use case, the states for the affected components must be updated atomically, from the point of view of the Client, to ensure that the system is still operational.
+
+To achieve this, some of the transition operations in the state model act on all components in the system, and other transition operations act on a single component at a time.
+
+Long-running (expensive) operations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Erasing non-volatile storage can be a high-latency operation. In some systems, this activity might block other memory i/o operations, including code execution directly from memory.
+
+Erase activity could be carried out as part of other transition operations (such as starting a new update, writing image data, or finishing the update). However, this prevents a latency-sensitive Client from mitigating the impact of a blocking erase operation.
+
+Isolating the erase activity within the state model would enable a Client to manage when such disruptive actions take place.
+
+
 Firmware Store state model
 --------------------------
 
@@ -58,9 +77,9 @@ A persistent state model for an in-progress Firmware Update is required for two 
 1. When updating firmware that is essential for system operation, a system restart is required to complete installation, and start executing the new system firmware. Communication between the runtime system and the Bootloader regarding the required installation operations must be done via memory.
 2. On constrained devices, the download of a new firmware image may take a long time, due to bandwidth or power limitations. A device restart should not invalidate the update progress that has already occurred.
 
-The basic flow required to update firmware within the constraints and meeting the requirements identified for the API is captured in the existing v0.7 document.
+The basic flow required to update firmware within the constraints and meeting the requirements identified for the API is mostly captured in the existing v0.7 document.
 
-For version 1.0, we propose to present the same operational flow as a state model of the **Firmware Store**, instead of an **individual image**, and the existing APIs will work to cause transitions within this alternative state model.
+For version 1.0, we propose to present the same operational flow as a state model of the component's **Firmware Store**, instead of an **individual image**, and the existing APIs will work to cause transitions within this alternative state model.
 
 Note
     Although readers might be familiar with the v0.7 image lifecycle-based state model, the definition of a Firmware Store-based state model is clearer without providing explicit linkage to the image states defined in v0.7.
@@ -84,17 +103,17 @@ The proposed set of Firmware Store states is as follows:
     * - WRITING
       - The Client is writing a new firmware image to the *second*, in preparation for installation.
 
-        When writing is complete, it can be installed.
+        When writing is complete, it can be prepared for installation.
+
+    * - CANDIDATE
+      - The Client has completed transfer of the new firmware image to the *second*.
+
+        When all components for update are prepared, they can be installed.
 
     * - STAGED
       - Installation of the *second* has been requested, but the system must be restarted as the final update operation runs within the Bootloader.
 
         This state is transient.
-
-    * - FAILED [a]_
-      - An installation of the *second* has been attempted, but has failed for some reason. The failure reason is recorded in the Store.
-
-        The *second* needs to be cleaned before another update can be attempted.
 
     * - TRIAL
       - Installation of the *second* has succeeded, and is now the *active* running in 'trial mode'. This state is transient, and requires the Client to explicitly accept the trial to make the update permanent.
@@ -106,16 +125,19 @@ The proposed set of Firmware Store states is as follows:
 
         This state is transient.
 
-    * - UPDATED [c]_
+    * - FAILED [a]_
+      - An installation of the *second* has been attempted, but has been cancelled or failed for some reason. The failure reason is recorded in the Firmware Store.
+
+        The *second* needs to be cleaned before another update can be attempted.
+
+    * - UPDATED
       - The *active* trial image has been accepted, and is now permanently active.
 
         The *second* contains the now-expired previous firmware image, which needs to be cleaned before another update can be started.
 
-.. [a] The FAILED state is required to enable a Client to detect that an attempted installation failed during `reboot`, and determine the reason for the failure.
+.. [a] The FAILED state enables a Client to detect that an attempted installation failed during `reboot`, and determine the reason for the failure.
 
 .. [b] The REJECTED state has limited difference from TRIAL, other than that it records that the trial has been explicitly rejected. However, this approach specifically prevents the Client accepting a trial after rejecting it; and enables other TRIAL policies to be implemented, such as permitting a limited number of restarts before automatically reverting to the previous image.
-
-.. [c] The UPDATED state always transitions to READY before starting a new update. Although the `clean` and `start` transitions could be merged, the separation of the states enables a possibly expensive `clean` operation to be called independently of starting a new update.
 
 The full set of states is necessary for components that require both of the following:
 
@@ -135,10 +157,12 @@ The Client can trigger transitions in the state model using the following operat
 
 * ``start``
 * ``write``
+* ``finish``
+* ``cancel``
 * ``install``
-* ``clean``
 * ``accept``
 * ``reject``
+* ``clean``
 
 Some transitions can only be triggered by a system restart, which will run the Bootloader. For these transitions it does not matter how the reboot was triggered.
 
@@ -165,74 +189,107 @@ State/operation transition matrix
       -
       -
       -
+      -
+      -
     * - State
       - ``start``
       - ``write``
-      - ``install``
+      - ``finish``
+      - ``cancel``
+      - ``install`` [c]_
       - ``reboot``
-      - ``accept``
-      - ``reject``
+      - ``accept`` [c]_
+      - ``reject`` [c]_
       - ``clean``
 
     * - READY
-      - Begin update →WRITING
+      - Begin update → WRITING
       - *Error*
-      - *Error*
-      - no effect
       - *Error*
       - *Error*
       - no effect
+      - no effect
+      - no effect
+      - no effect
+      - *Error*
     * - WRITING
       - *Error*
-      - Write to *second*
-      - Verify *second* →STAGED
+      - Write *second*
+      - Verify *second* → CANDIDATE
+      - Abort update → FAILED
+      - no effect
+      - no effect
+      - no effect
       - no effect
       - *Error*
-      - Abort update →FAILED
+    * - CANDIDATE
+      - *Error*
+      - *Error*
+      - *Error*
+      - Abort update → FAILED
+      - Verify *second* → STAGED
+      - no effect
+      - no effect
+      - no effect
       - *Error*
     * - STAGED
       - *Error*
       - *Error*
       - *Error*
-      - if install successful:
-          Swap images →TRIAL
+      - *Error*
+      - *Error*
+      - Install Ok?
+          Swap images
+          →TRIAL
         else:
-          Record error →FAILED
+          Record error
+          →FAILED
       - *Error*
       - Abort update →FAILED
       - *Error*
-    * - FAILED
-      - *Error*
-      - *Error*
-      - *Error*
-      - no effect
-      - *Error*
-      - *Error*
-      - Clean *second* →READY
     * - TRIAL
       - *Error*
       - *Error*
       - *Error*
+      - *Error*
+      - *Error*
       - Swap images →FAILED
-      - Lock in update →UPDATED
+      - Commit update →UPDATED
       - Reject update →REJECTED
       - *Error*
     * - REJECTED
       - *Error*
       - *Error*
       - *Error*
+      - *Error*
+      - *Error*
       - Swap images →FAILED
       - *Error*
       - *Error*
       - *Error*
-    * - UPDATED
+    * - FAILED
+      - *Error*
       - *Error*
       - *Error*
       - *Error*
       - no effect
-      - *Error*
-      - *Error*
+      - no effect
+      - no effect
+      - no effect
       - Clean *second* →READY
+    * - UPDATED
+      - *Error*
+      - *Error*
+      - *Error*
+      - *Error*
+      - no effect
+      - no effect
+      - no effect
+      - no effect
+      - Clean *second* →READY
+
+.. [c] This operation affects all components in the initial state for the transition.
+
 
 Variation in system design parameters
 -------------------------------------
@@ -253,7 +310,7 @@ No               No              See `basic state model <Components that require
 Components that require a reboot, but no trial
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If a component does not require testing before committing the update, the the TRIAL and REJECTED states are not used. The `reboot` operation that installs the firmware will transition to UPDATED on success, or FAILED on failure. The `accept` operation is never used, the `reject` operation is still used to cancel an update that has been started.
+If a component does not require testing before committing the update, the the TRIAL and REJECTED states are not used. The `reboot` operation that installs the firmware will transition to UPDATED on success, or FAILED on failure. The `accept` operation is never used, the `reject` operation is still used to abandon an update that has been STAGED.
 
 The simplified flow is as follows:
 
@@ -262,7 +319,7 @@ The simplified flow is as follows:
 Components that require a trial, but no reboot
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If a component does not require a reboot to complete installation, the STAGED state is not required. The `install` operation will complete the installation immediately, transitioning to TRIAL if successful (see `Open issues`_ regarding the behavior on a failed installation).
+If a component does not require a reboot to complete installation, the STAGED state is not required. The `install` operation will complete the installation immediately, transitioning to TRIAL if successful.
 
 This use case also removes the REJECTED state, because the `reject` operation from TRIAL state does not require a `reboot` to complete. A `reject` operation from TRIAL states transitions directly to FAILED.
 
@@ -277,8 +334,7 @@ The simplified flow is as follows:
 Components that require neither a reboot, nor a trial
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If a component does not require a reboot to complete installation, and does not require testing before committing the update, then
-the STAGED, TRIAL, and REJECTED states are not required. The `install` operation will complete the installation immediately, transitioning to UPDATED if successful (see `Open issues`_ regarding the behavior on a failed installation).
+If a component does not require a reboot to complete installation, and does not require testing before committing the update, then the STAGED, TRIAL, and REJECTED states are not required. The `install` operation will complete the installation immediately, transitioning to UPDATED if successful. The `accept` and `reject` operations are not used.
 
 The simplified flow is as follows:
 
@@ -306,6 +362,7 @@ The section on `variations <Variation in system design parameters_>`_ describes 
 
 Are all of these use cases important for documenting in version 1.0?
 
+Are other variations important for v1.0?
 
 ------
 
@@ -314,16 +371,16 @@ Appendix: Operation comparison with v0.7
 
 Most of the Client operations align with the functions in the v0.7 API. This RFC proposes some changes related to the start of the update process, and renaming of the ``start``, ``reject`` and ``clean`` operations. The following table summarizes the relationship:
 
-==============       =============
-v1.0 operation       v0.7 API name
-==============       =============
-``start``            ``psa_fwu_set_manifest()``
-``write``            ``psa_fwu_write()``
-``install``          ``psa_fwu_install()``
-``reject``           ``psa_fwu_request_rollback()``
-``accept``           ``psa_fwu_accept()``
-``clean``            ``psa_fwu_abort()``
-==============       =============
+======================== =============
+v1.0 operation           v0.7 API name
+======================== =============
+``start``                ``psa_fwu_set_manifest()``
+``write``                ``psa_fwu_write()``
+``finish`` + ``install`` ``psa_fwu_install()``
+``reject``               ``psa_fwu_request_rollback()``
+``accept``               ``psa_fwu_accept()``
+``cancel`` + ``clean``   ``psa_fwu_abort()``
+======================== =============
 
 
 Beginning an update
@@ -341,6 +398,13 @@ Note
 
     However, the provision of support for breaking up long-running operations is simpler if the potentially very slow ``clean`` activity is separated from the ``start`` activity.
 
+Applying an update
+~~~~~~~~~~~~~~~~~~
+
+In v0.7, there is no mechanism to indicate that a set of component updates must be applied simultaneously. This can be necessary if there is a cycle of version dependencies between the updated component images.
+
+To allow multiple components to be installed at the same time, the v1.0 state model separates the completion of writing the image - ``finish`` - from the request to start installation - ``install``. The ``finish`` operation only acts on a single specified component; the ``install`` operation acts on all components that are in CANDIDATE state.
+
 Abandon and clean up an update operation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -348,11 +412,10 @@ In v0.7, the ``abort`` operation was used to abandon an update process and retur
 
 However, there are several situations in the v0.7 state model where clean of the storage has to occur as an implicit effect of another operation, such as ``write``.
 
-For v1.0, we make the clearing of the storage always the result of an explicit ``clean`` operation. The 'cancel the current update' aspect of the v0.7 ``abort`` operation is now available from the ``reject`` operation. The ``reject`` operation can be used to abort an update from WRITING, STAGED, or TRIAL states; following this, the ``clean`` operation will return to the READY state. A new update process cannot be started, until the firmware store is in a READY state.
+For v1.0, we make the clearing of the storage always the result of an explicit ``clean`` operation. The 'cancel the current update' aspect of the v0.7 ``abort`` operation is now available from the ``cancel`` or ``reject`` operations. The ``cancel`` operations can be used to abort an update from WRITING or CANDIDATE states; the ``reject`` operation can be used to abort an update from STAGED or TRIAL states; following this, the ``clean`` operation will return the component to the READY state. A new update process cannot be started, until the firmware store is in a READY state.
 
 Rationale
     The provision of support for breaking up long-running operations is simpler if the potentially very slow ``clean`` activity is separated from other operations.
-
 
 -----
 
