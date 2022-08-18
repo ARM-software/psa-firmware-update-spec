@@ -77,16 +77,16 @@ typedef struct psa_fwu_image_version_t {
 } psa_fwu_image_version_t;
 
 /**
- * @brief The size of the implementation-specific area of the firmware store
- *        information.
+ * @brief The implementation-specific data in the component information
+ *        structure.
  */
-#define PSA_FWU_STORE_INFO_SZ   /* implementation-specific value */
+typedef struct { /* implementation-defined type */ } psa_fwu_impl_info_t;
 
 /**
  * @brief Information about the firmware store for a firmware component.
  */
 typedef struct psa_fwu_component_info_t {
-    /// @brief State of Firmware store.
+    /// @brief State of the component.
     uint8_t state;
     /// @brief Error for second image when store state is REJECTED or FAILED.
     psa_status_t error;
@@ -100,17 +100,17 @@ typedef struct psa_fwu_component_info_t {
     /// @brief Implementation-defined image location.
     uint32_t location;
     /// @brief Reserved for implementation-specific usage.
-    uint8_t impl[PSA_FWU_STORE_INFO_SZ];
+    psa_fwu_impl_info_t impl;
 } psa_fwu_component_info_t;
 
 
 /**
  * @brief Retrieve the firmware store information for a specific firmware
  *        component.
- * 
- * @param component Firmware component for which store information is requested.
+ *
+ * @param component Firmware component for which information is requested.
  * @param info      Output parameter for component information.
- * 
+ *
  * @return Result status.
  */
 psa_status_t psa_fwu_query(psa_fwu_component_t component,
@@ -128,32 +128,37 @@ psa_status_t psa_fwu_query(psa_fwu_component_t component,
 #define PSA_FWU_WRITING 1u
 
 /**
- * @brief The STAGED state: a new firmware image is ready for installation.
+ * @brief The CANDIDATE state: a new firmware image is ready for installation.
  */
-#define PSA_FWU_STAGED 2u
+#define PSA_FWU_CANDIDATE 2u
+
+/**
+ * @brief The STAGED state: a new firmware image is queued for installation.
+ */
+#define PSA_FWU_STAGED 3u
 
 /**
  * @brief The FAILED state: a firmware update has been cancelled or has failed.
  */
-#define PSA_FWU_FAILED 3u
+#define PSA_FWU_FAILED 4u
 
 /**
  * @brief The TRIAL state: a new firmware image requires testing prior to
  *        acceptance of the update.
  */
-#define PSA_FWU_TRIAL 4u
+#define PSA_FWU_TRIAL 5u
 
 /**
  * @brief The REJECTED state: a new firmware image has been rejected after
  *        testing.
  */
-#define PSA_FWU_REJECTED 5u
+#define PSA_FWU_REJECTED 6u
 
 /**
  * @brief The UPDATED state: a firmware update has been successful, and the new
  *        image is now active.
  */
-#define PSA_FWU_UPDATED 6u
+#define PSA_FWU_UPDATED 7u
 
 /**
  * @brief Flag to indicate whether the image data in the component staging area
@@ -175,12 +180,12 @@ psa_status_t psa_fwu_query(psa_fwu_component_t component,
 
 /**
  * @brief Begin a firmware update operation for a specific firmware component.
- * 
+ *
  * @param component     Identifier of the firmware component to be updated.
  * @param manifest      A pointer to a buffer containing update metadata
  *                      (optional).
  * @param manifest_size The size of the metadata (optional).
- * 
+ *
  * @return Result status.
  */
 psa_status_t psa_fwu_start(psa_fwu_component_t component,
@@ -191,12 +196,12 @@ psa_status_t psa_fwu_start(psa_fwu_component_t component,
 /**
  * @brief Write a firmware image, or part of a firmware image, to its staging
  *        area.
- * 
+ *
  * @param component    Identifier of the firmware component being updated.
  * @param image_offset The offset of the data block in the whole image.
  * @param block        A buffer containing a block of image data.
  * @param block_size   Size of block, in bytes.
- * 
+ *
  * @return Result status.
  */
 psa_status_t psa_fwu_write(psa_fwu_component_t component,
@@ -205,52 +210,62 @@ psa_status_t psa_fwu_write(psa_fwu_component_t component,
                            size_t block_size);
 
 /**
- * @brief Start the installation of a firmware image that has been written to
- *        the staging area.
- * 
+ * @brief Mark a firmware image in the staging area as ready for installation.
+ *
  * @param component Identifier of the firmware component to install.
- * 
+ *
  * @return Result status.
  */
-psa_status_t psa_fwu_install(psa_fwu_component_t component);
+psa_status_t psa_fwu_finish(psa_fwu_component_t component);
+
+/**
+ * @brief Abandon an update that is in WRITING or CANDIDATE state.
+ *
+ * @param component Identifier of the firmware component to be cancelled.
+ *
+ * @return Result status.
+ */
+psa_status_t psa_fwu_cancel(psa_fwu_component_t component);
+
+/**
+ * @brief Prepare the component for another update.
+ *
+ * @param component Identifier of the firmware component to tidy up.
+ *
+ * @return Result status.
+ */
+psa_status_t psa_fwu_clean(psa_fwu_component_t component);
+
+/**
+ * @brief Start the installation of all firmware images that have been prepared
+ *        for update.
+ *
+ * @return Result status.
+ */
+psa_status_t psa_fwu_install(void);
 
 /**
  * @brief Requests the platform to reboot.
- * 
+ *
  * @return Result status.
  */
 psa_status_t psa_fwu_request_reboot(void);
 
 /**
- * @brief Abandon an update that is in WRITING or STAGED state, or reject a
- *        firmware image that is in TRIAL state.
- * 
- * @param component Identifier of the firmware component to be rejected.
- * @param error     An application-specific error code chosen by the
- *                  application.
- * 
+ * @brief Abandon an installation that is in STAGED or TRIAL state.
+ *
+ * @param error An application-specific error code chosen by the application.
+ *
  * @return Result status.
  */
-psa_status_t psa_fwu_reject(psa_fwu_component_t component,
-                            psa_status_t error);
+psa_status_t psa_fwu_reject(psa_status_t error);
 
 /**
  * @brief Accept a firmware update that is currently in TRIAL state.
- * 
- * @param component Identifier of the firmware component to be accepted.
- * 
+ *
  * @return Result status.
  */
-psa_status_t psa_fwu_accept(psa_fwu_component_t component);
-
-/**
- * @brief Prepare the firmware store for another update.
- * 
- * @param component Identifier of the firmware component to tidy up.
- * 
- * @return Result status.
- */
-psa_status_t psa_fwu_clean(psa_fwu_component_t component);
+psa_status_t psa_fwu_accept(void);
 
 #ifdef __cplusplus
 }
