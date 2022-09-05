@@ -175,7 +175,7 @@ psa_status_t psa_fwu_query(psa_fwu_component_t component,
 /**
  * @brief The maximum permitted size for block in psa_fwu_write(), in bytes.
  */
-#define PSA_FWU_MAX_BLOCK_SIZE /* implementation-specific value */
+#define PSA_FWU_MAX_WRITE_SIZE /* implementation-specific value */
 
 
 /**
